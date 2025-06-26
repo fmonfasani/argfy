@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from .routers import indicators
 from .database import engine, Base, init_db
 from datetime import datetime
+#import asyncio
 import os
 
 # Crear tablas si no existen
@@ -129,10 +130,10 @@ async def not_found_handler(request, exc):
             ]
         }
     )
-@app.on_event("startup")
-async def startup_event():
-    if os.getenv("ENVIRONMENT") == "production":
-        asyncio.create_task(ping_self())
+#@app.on_event("startup")
+#async def startup_event():
+#    if os.getenv("ENVIRONMENT") == "production":
+#        asyncio.create_task(ping_self())
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
