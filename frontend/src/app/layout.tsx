@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
-import TradingViewMarquee from '@/components/TradingViewMarquee'
+// import TradingViewMarquee from '@/components/TradingViewMarquee'  // ← COMENTADO
 import SecondaryNav from '@/components/SecondaryNav'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description: 'Datos económicos argentinos en tiempo real para desarrolladores, traders y analistas',
   keywords: 'argentina, economia, finanzas, datos, api, dolar, inflacion, bcra',
   authors: [{ name: 'Argfy Team' }],
-  viewport: 'width=device-width, initial-scale=1',
-  themeColor: '#0f172a',
+  // viewport: 'width=device-width, initial-scale=1',  // ← MOVER A viewport export
+  // themeColor: '#0f172a',  // ← MOVER A viewport export
   openGraph: {
     title: 'Argfy - Financial Data Platform',
     description: 'Plataforma de datos económicos argentinos en tiempo real',
@@ -34,8 +34,8 @@ export default function RootLayout({
         {/* Main Header */}
         <Header />
         
-        {/* TradingView Marquee */}
-        <TradingViewMarquee />
+        {/* TradingView Marquee - TEMPORALMENTE DESHABILITADO */}
+        {/* <TradingViewMarquee /> */}
         
         {/* Secondary Navigation */}
         <SecondaryNav />
@@ -45,11 +45,11 @@ export default function RootLayout({
           {children}
         </main>
         
-        {/* Scripts externos */}
-        <script 
+        {/* Scripts externos - COMENTADO */}
+        {/* <script 
           src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" 
           async 
-        />
+        /> */}
       </body>
     </html>
   )

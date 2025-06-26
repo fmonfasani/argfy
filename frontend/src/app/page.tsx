@@ -1,6 +1,6 @@
 // frontend/src/app/page.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useState} from 'react'
 import Link from 'next/link'
 import EconomicDataCards from '@/components/EconomicDataCards'
 import DailyEconomicData from '@/components/DailyEconomicData'
@@ -71,13 +71,10 @@ export default function HomePage() {
       <MarketsSection />
 
       {/* Daily Economic Data Section */}
-      <DailyEconomicData />
+      {<DailyEconomicData />}
 
       {/* News Section */}
       <NewsSection />
-
-      {/* Economics Analysis Section */}
-      <EconomicsSection />
 
       {/* Footer */}
       <Footer />
