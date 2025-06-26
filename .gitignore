@@ -3,3 +3,6 @@ __pycache__/
 backend/data/
 /node_modules/
 *node_modules
+.backend/venv
+# Pytest cache
+.cache

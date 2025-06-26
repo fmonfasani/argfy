@@ -2,3 +2,9 @@
 __pycache__/
 *.py[cod]
 backend/data/
+.venv
+# Pytest cache
+.cache
+# mypy cache
+.mypy_cache/
+venv/
