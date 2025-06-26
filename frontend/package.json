@@ -5,10 +5,10 @@
   "description": "Argfy Platform - Frontend Dashboard para datos económicos argentinos",
   "author": "Argfy Team <contact@argfy.com>",
   "license": "MIT",
-  "homepage": "https://argfy.vercel.app",
+  "homepage": "https://argfy-platform.vercel.app",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tu-usuario/argfy-platform.git"
+    "url": "git+https://github.com/fmonfasani/argfy.git"
   },
   "scripts": {
     "dev": "next dev",
