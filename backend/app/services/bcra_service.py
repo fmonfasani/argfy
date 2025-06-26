@@ -1,9 +1,7 @@
-# backend/app/services/bcra_service.py
+# app/services/bcra_service.py - Versión sin pandas
 import requests
-import pandas as pd
-from datetime import datetime, timedelta
 import random
-import json
+from datetime import datetime, timedelta
 
 class BCRAService:
     BASE_URL = "https://api.bcra.gob.ar"
@@ -17,7 +15,6 @@ class BCRAService:
     def get_exchange_rate(self):
         """Obtiene cotización USD oficial del BCRA"""
         try:
-            # Endpoint para tipo de cambio USD
             endpoint = f"{self.BASE_URL}/estadisticas/v2.0/datosvariable/1/2023-01-01/2024-12-31"
             response = self.session.get(endpoint, timeout=10)
             if response.status_code == 200:
@@ -30,7 +27,6 @@ class BCRAService:
     def get_reserves(self):
         """Obtiene reservas internacionales"""
         try:
-            # Variable 15: Reservas internacionales del BCRA
             endpoint = f"{self.BASE_URL}/estadisticas/v2.0/datosvariable/15/2023-01-01/2024-12-31"
             response = self.session.get(endpoint, timeout=10)
             if response.status_code == 200:
@@ -44,7 +40,6 @@ def generate_demo_data():
     """Genera datos de demo para la plataforma"""
     base_date = datetime.now()
     
-    # Datos base realistas
     demo_indicators = [
         {
             "indicator_type": "dolar_blue",
@@ -152,27 +147,6 @@ def generate_demo_news():
             "category": "COMMODITIES",
             "source": "Argfy News",
             "published_at": datetime.now() - timedelta(hours=6)
-        },
-        {
-            "title": "Inflación de junio: 4.2%",
-            "summary": "INDEC publicó el dato de inflación mensual que mostró una desaceleración respecto al mes anterior...",
-            "category": "INFLACIÓN", 
-            "source": "Argfy News",
-            "published_at": datetime.now() - timedelta(hours=8)
-        },
-        {
-            "title": "Nuevas regulaciones para criptomonedas",
-            "summary": "El gobierno anunció un marco regulatorio para el uso de criptomonedas en el sistema financiero...",
-            "category": "FINTECH",
-            "source": "Argfy News", 
-            "published_at": datetime.now() - timedelta(hours=12)
-        },
-        {
-            "title": "Récord en exportaciones de tecnología",
-            "summary": "El sector tecnológico alcanzó US$7.8B en exportaciones, consolidándose como motor del crecimiento...",
-            "category": "EXPORTACIONES",
-            "source": "Argfy News",
-            "published_at": datetime.now() - timedelta(days=1)
         }
     ]
     

@@ -1,4 +1,3 @@
-# backend/app/models.py
 from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean, Text
 from .database import Base
 from datetime import datetime
@@ -7,12 +6,12 @@ class EconomicIndicator(Base):
     __tablename__ = "economic_indicators"
     
     id = Column(Integer, primary_key=True, index=True)
-    indicator_type = Column(String, index=True)  # "dolar_blue", "inflacion", etc.
+    indicator_type = Column(String, index=True)
     value = Column(Float)
     date = Column(DateTime, default=datetime.utcnow)
-    source = Column(String)  # "BCRA", "INDEC", etc.
+    source = Column(String)
     is_active = Column(Boolean, default=True)
-    metadata_info = Column(Text, nullable=True)  # JSON adicional
+    metadata_info = Column(Text, nullable=True)
     
     def __repr__(self):
         return f"<EconomicIndicator(type={self.indicator_type}, value={self.value})>"
@@ -24,7 +23,7 @@ class HistoricalData(Base):
     indicator_id = Column(String, index=True)
     value = Column(Float)
     date = Column(DateTime)
-    period = Column(String)  # "daily", "monthly", "yearly"
+    period = Column(String)
     source = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     
