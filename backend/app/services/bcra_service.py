@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -296,6 +298,170 @@ async def test_bcra_service():
             print(f"Latest USD: ${latest['value']} on {latest['date']}")
         
         print("\n✅ BCRA Service test completed!")
+def generate_demo_data():
+    """Genera datos de demo para indicadores económicos"""
+    return [
+        {
+            'indicator_type': 'dolar_blue',
+            'value': round(1180.0 + random.uniform(-30, 30), 2),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'dolar_oficial',
+            'value': round(987.50 + random.uniform(-10, 10), 2),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'riesgo_pais',
+            'value': round(1650 + random.uniform(-50, 50)),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'inflacion_mensual',
+            'value': round(4.2 + random.uniform(-1, 1), 1),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'reservas_bcra',
+            'value': round(21500.0 + random.uniform(-1000, 1000), 2),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'merval',
+            'value': round(1890000 + random.uniform(-50000, 50000), 2),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'tasa_bcra',
+            'value': round(118.0 + random.uniform(-5, 5), 1),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        },
+        {
+            'indicator_type': 'base_monetaria',
+            'value': round(28500000 + random.uniform(-1000000, 1000000), 2),
+            'date': datetime.now(),
+            'source': 'demo',
+            'is_active': True
+        }
+    ]
+
+def generate_historical_data(indicator_type: str, days: int = 30):
+    """Genera datos históricos de demo para un indicador"""
+    base_values = {
+        'dolar_blue': 1180.0,
+        'dolar_oficial': 987.50,
+        'riesgo_pais': 1650.0,
+        'inflacion_mensual': 4.2,
+        'reservas_bcra': 21500.0,
+        'merval': 1890000.0,
+        'tasa_bcra': 118.0,
+        'base_monetaria': 28500000.0
+    }
+    
+    base_value = base_values.get(indicator_type, 100.0)
+    historical_data = []
+    
+    for i in range(days):
+        date = datetime.now() - timedelta(days=days-i)
+        
+        # Simular variación histórica
+        variation = random.uniform(-0.05, 0.05)  # ±5% de variación
+        value = base_value * (1 + variation * i / days)
+        
+        historical_data.append({
+            'indicator_id': indicator_type,
+            'value': round(value, 2),
+            'date': date,
+            'period': 'daily'
+        })
+    
+    return historical_data
+
+def generate_demo_news():
+    """Genera noticias de demo"""
+    news_templates = [
+        {
+            'title': 'BCRA mantiene tasa de política monetaria en {}%',
+            'content': 'El Banco Central decidió mantener la tasa de política monetaria en su nivel actual como parte de su estrategia de estabilización.',
+            'category': 'monetary_policy',
+            'importance': 'high'
+        },
+        {
+            'title': 'Reservas internacionales alcanzan USD {} millones',
+            'content': 'Las reservas del BCRA muestran una evolución positiva en el contexto actual del mercado cambiario.',
+            'category': 'reserves',
+            'importance': 'medium'
+        },
+        {
+            'title': 'Inflación mensual se ubicó en {}% en el último período',
+            'content': 'El INDEC reportó los últimos datos de inflación mensual, mostrando la evolución de los precios en la economía.',
+            'category': 'inflation',
+            'importance': 'high'
+        },
+        {
+            'title': 'Dólar blue cotiza en torno a los ${}',
+            'content': 'El mercado paralelo del dólar continúa con su dinámica habitual en las cuevas del microcentro porteño.',
+            'category': 'exchange_rate',
+            'importance': 'medium'
+        },
+        {
+            'title': 'Merval cierra con tendencia positiva',
+            'content': 'Los principales paneles de la Bolsa de Comercio de Buenos Aires mostraron una jornada favorable para los inversores.',
+            'category': 'stock_market',
+            'importance': 'low'
+        }
+    ]
+    
+    demo_news = []
+    
+    for i, template in enumerate(news_templates):
+        # Generar valores para los placeholders
+        if '{}' in template['title']:
+            if 'tasa' in template['title']:
+                value = "118.0"
+            elif 'Reservas' in template['title']:
+                value = "21,500"
+            elif 'Inflación' in template['title']:
+                value = "4.2"
+            elif 'Dólar' in template['title']:
+                value = "1,180"
+            else:
+                value = "N/A"
+            
+            title = template['title'].format(value)
+            content = template['content']
+        else:
+            title = template['title']
+            content = template['content']
+        
+        news_item = {
+            'title': title,
+            'content': content,
+            'category': template['category'],
+            'importance': template['importance'],
+            'published_date': datetime.now() - timedelta(hours=i*6),
+            'source': 'demo',
+            'url': f'https://demo.argfy.com/news/{i+1}',
+            'is_active': True
+        }
+        
+        demo_news.append(news_item)
+    
+    return demo_news
 
 if __name__ == "__main__":
     # Run test
