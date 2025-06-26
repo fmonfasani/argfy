@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import InternationalMarquee from '@/components/InternationalMarquee'
-import ArgentineStocksMarquee from '@/components/ArgentineStocksMarquee'
 import ArgentineEconomicMarquee from '@/components/ArgentineEconomicMarquee'
+import ArgentineStocksMarquee from '@/components/ArgentineStocksMarquee'
 import Header from '@/components/Header'
 import SecondaryNav from '@/components/SecondaryNav'
 
@@ -30,17 +30,22 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${inter.className} bg-slate-100 min-h-screen`}>
-        {/* MARQUESINAS ARRIBA DE TODO */}
-        
-        {/* 1. Marquesina Internacional (Izquierda) */}
-        <InternationalMarquee />     
-               
-        {/* 3. Marquesina Datos Económicos Argentina (Izquierda) */}
-        <ArgentineEconomicMarquee />
-        {/* 2. Marquesina Acciones Argentinas (Derecha) */}
-        <ArgentineStocksMarquee />
+
+
         {/* Header Principal */}
         <Header />
+        {/* MARQUESINAS FINALES - ALTURA 50px */}
+        
+        {/* 1. Internacional (Celeste, Rápida, ➡️) */}
+        <InternationalMarquee />     
+               
+        {/* 2. Económica Argentina (Blanco, Media, ⬅️) */}
+        <ArgentineEconomicMarquee />
+        
+        {/* 3. Acciones Argentinas (Celeste, Lenta, ➡️) */}
+        <ArgentineStocksMarquee />
+        
+
         
         {/* Navegación Secundaria */}
         <SecondaryNav />

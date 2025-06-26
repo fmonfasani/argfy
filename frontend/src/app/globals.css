@@ -1,66 +1,243 @@
-/* frontend/src/app/globals.css */
+/* frontend/src/app/globals.css - VERSIÓN FINAL */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ------------  RESET & UTILIDADES  ----------------- */
-*{
+* {
   font-family: system-ui, -apple-system, sans-serif;
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html{ scroll-behavior:smooth; }
-
-/* …(tus otras clases y componentes siguen igual)… */
-
-/* ------------  MARQUESINAS  ----------------- */
-
-/* 1️⃣ Contenedor: oculta el desbordamiento */
-.marquee-container{
-  overflow:hidden;
-  white-space:nowrap;
+html { 
+  scroll-behavior: smooth; 
 }
 
-/* 2️⃣ Pista que se mueve (puedes añadir flex/inline-flex si necesitas) */
-.marquee-track{
-  display:inline-block;
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
-/* 3️⃣ Animaciones — solo dos, una para cada dirección */
-@keyframes marquee-left{   /* 👉 izquierda */
-  0%   { transform:translateX(100%); }
-  100% { transform:translateX(-100%); }
+/* FORZAR ANCHO COMPLETO EN MARQUESINAS */
+.marquee-container,
+.tradingview-widget-container,
+.tradingview-widget-container__widget {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-@keyframes marquee-right{  /* 👉 derecha */
-  0%   { transform:translateX(-100%); }
-  100% { transform:translateX(100%); }
+/* ------------  MARQUESINAS PROFESIONALES  ----------------- */
+
+/* 1️⃣ Contenedor principal con altura fija */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  height: 50px; /* ALTURA FINAL: 50px */
+  width: 100%; /* Ocupa todo el ancho */
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-/* 4️⃣ Helpers que aplican la animación */
-.marquee-left {  animation: marquee-left 30s linear infinite; }
-.marquee-right{  animation: marquee-right 60s linear infinite; }
-
-/* Velocidad diferente? duplica la clase:
-   .marquee-left-fast{ animation:marquee-left 20s linear infinite; } */
-
-/* 5️⃣ Pausar al pasar el ratón (opcional) */
-.marquee-hover:hover .marquee-left,
-.marquee-hover:hover .marquee-right{
-  animation-play-state:paused;
+/* 2️⃣ Efectos de gradiente en los bordes */
+.marquee-container::before,
+.marquee-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* 6️⃣ Si usas TradingView dentro y necesitas invertir texto
-      (solo cuando la dirección sea derecha → izquierda)       */
-.marquee-right .tradingview-widget-container__widget{ direction:rtr; }
-.marquee-left  .tradingview-widget-container__widget{ direction:ltr; }
+.marquee-container::before { left: 0; }
+.marquee-container::after { right: 0; }
 
-/* ------------  RESPONSIVE (ejemplo)  ----------------- */
-@media (max-width:768px){
-  .marquee-left,
-  .marquee-right{
-    animation-duration:30s;   /* más lento en mobile */
+/* 3️⃣ Colores de fondo - Celeste y Blanco */
+.marquee-celeste {
+  background-color: #edfcff; /* Celeste pastel suave */
+}
+.marquee-celeste::before {
+  background: linear-gradient(to right, rgb(236, 253, 255), rgba(224, 247, 250, 0));
+}
+.marquee-celeste::after {
+  background: linear-gradient(to left, rgba(224, 247, 250, 1), rgba(224, 247, 250, 0));
+}
+
+.marquee-blanco {
+  background-color: #fffff5; /* Blanco puro */
+}
+.marquee-blanco::before {
+  background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+.marquee-blanco::after {
+  background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+/* 4️⃣ Track de la marquesina */
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+  height: 100%;
+  width: 100%; /* Asegurar ancho completo */
+ 
+}
+
+/* 5️⃣ Animaciones con velocidades diferenciadas */
+@keyframes marquee-left {
+  0% { transform: translateX(25%); }
+  25% { transform: translateX(-100%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.marquee-left-fast { 
+  animation: marquee-left 35s linear infinite; 
+}
+
+.marquee-right-normal { 
+  animation: marquee-right 90s linear infinite; 
+}
+
+.marquee-left-slow { 
+  animation: marquee-left 55s linear infinite; 
+}
+
+/* 6️⃣ Items de datos */
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.2rem;
+  margin: 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  height: 35px; /* Altura de items ajustada para 50px container */
+}
+
+/* 7️⃣ Separadores */
+.marquee-separator {
+  width: 1px;
+  height: 20px;
+  background-color: rgba(0,0,0,0.08);
+  margin: 0 1rem;
+  flex-shrink: 0;
+}
+
+/* 8️⃣ Texto y etiquetas */
+.marquee-label {
+  color: #6B7280;
+  margin-right: 0.5rem;
+  font-weight: 400;
+}
+
+.marquee-value {
+  color: #111827;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+/* 9️⃣ Cambios de precio - Solo texto coloreado */
+.marquee-change {
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* Sin padding ni background - solo texto limpio */
+}
+
+.marquee-change.positive {
+  color: #16a34a; /* Verde vibrante */
+}
+
+.marquee-change.negative {
+  color: #dc2626; /* Rojo vibrante */
+}
+
+/* 🔟 Efectos hover suaves */
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-container:hover {
+  filter: brightness(0.98);
+}
+
+.marquee-celeste:hover {
+  background-color: #c6f9ff; /* Celeste ligeramente más oscuro */
+}
+
+.marquee-blanco:hover {
+  background-color: #f5f9fd; /* Gris muy suave */
+}
+
+/* 1️⃣1️⃣ Responsive */
+@media (max-width: 768px) {
+  .marquee-container {
+    height: 45px; /* Más compacto en móvil */
+  }
+  
+  .marquee-item {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+    height: 32px;
+  }
+  
+  .marquee-separator {
+    margin: 0 0.75rem;
+    height: 16px;
+  }
+  
+  .marquee-left-fast { animation-duration: 20s; }
+  .marquee-right-normal { animation-duration: 32s; }
+  .marquee-left-slow { animation-duration: 45s; }
+}
+
+/* 1️⃣2️⃣ Ocultar elementos de TradingView */
+.tradingview-widget-container .tradingview-widget-copyright {
+  display: none !important;
+}
+
+.tradingview-widget-container .tv-embed-widget-wrapper__header {
+  display: none !important;
+}
+
+.tradingview-widget-container [class*="copyright"] {
+  display: none !important;
+}
+
+.tradingview-widget-container [class*="powered"] {
+  display: none !important;
+}
+
+/* 1️⃣3️⃣ Entrada suave */
+.marquee-container {
+  opacity: 0;
+  animation: fadeInMarquee 0.8s ease-out forwards;
+}
+
+.marquee-container:nth-child(1) { animation-delay: 0.1s; }
+.marquee-container:nth-child(2) { animation-delay: 0.2s; }
+.marquee-container:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInMarquee {
+  from { 
+    opacity: 0; 
+    transform: translateY(-3px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
   }
 }

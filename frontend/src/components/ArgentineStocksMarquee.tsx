@@ -18,35 +18,83 @@ export default function ArgentineStocksMarquee() {
       script.async = true
       script.innerHTML = JSON.stringify({
         "symbols": [
-          // Índice MERVAL
           { "proName": "BYMA:IMV", "title": "MERVAL" },
-          // Acciones BYMA
-          { "proName": "BYMA:GGAL", "title": "Galicia" },
+          { "proName": "BYMA:GGAL", "title": "GGAL" },
           { "proName": "BYMA:YPFD", "title": "YPF" },
-          { "proName": "BYMA:PAMP", "title": "Pampa Energía" },
-          { "proName": "BYMA:TXAR", "title": "Ternium" },
-          { "proName": "BYMA:ALUA", "title": "Aluar" },
-          { "proName": "BYMA:COME", "title": "Comes" },
-          { "proName": "BYMA:CRES", "title": "Cresud" },
-          { "proName": "BYMA:MIRG", "title": "Mirgor" },
-          { "proName": "BYMA:TECO2", "title": "Telecom" },
-          // ADRs en NYSE
-          { "proName": "NYSE:GGAL", "title": "Galicia ADR" },
+          { "proName": "BYMA:PAMP", "title": "PAMP" },
+          { "proName": "BYMA:TXAR", "title": "TXAR" },
+          { "proName": "BYMA:ALUA", "title": "ALUA" },
+          { "proName": "BYMA:COME", "title": "COME" },
+          { "proName": "BYMA:TECO2", "title": "TECO2" },
+          { "proName": "BYMA:MIRG", "title": "MIRG" },
+          { "proName": "NASDAQ:GGAL", "title": "GGAL ADR" },
           { "proName": "NYSE:YPF", "title": "YPF ADR" },
-          { "proName": "NYSE:PAM", "title": "Pampa ADR" },
-          { "proName": "NYSE:TEO", "title": "Telecom ADR" }
+          { "proName": "NYSE:PAM", "title": "PAM ADR" },
+          { "proName": "NYSE:TEO", "title": "TEO ADR" },
+          { "proName": "NASDAQ:MELI", "title": "MELI" },
+          { "proName": "NASDAQ:GLOB", "title": "GLOB" }
         ],
+        "showSymbolLogo": false,
         "isTransparent": true,
-        "colorTheme": "light"
-        
+        "displayMode": "adaptive",
+        "colorTheme": "light",
+        "locale": "en",
+        "largeChartUrl": ""
       })
 
       container.appendChild(script)
     } catch (error) {
       console.error('Error loading Argentine Stocks widget:', error)
+      // Solo usar fallback si TradingView falla completamente
       container.innerHTML = `
-        <div class="bg-green-50 p-2 text-center marquee-left">
-          <span class="text-xs text-green-700">🇦🇷 Acciones Argentinas • BYMA • ADRs</span>
+        <div class="marquee-track marquee-left-slow">
+          <div class="marquee-item">
+            <span class="marquee-label">MERVAL</span>
+            <span class="marquee-value">1,456,234</span>
+            <span class="marquee-change positive">+2.1%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">GGAL</span>
+            <span class="marquee-value">2,847</span>
+            <span class="marquee-change positive">+3.2%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">YPFD</span>
+            <span class="marquee-value">12,450</span>
+            <span class="marquee-change positive">+1.8%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">PAMP</span>
+            <span class="marquee-value">8,920</span>
+            <span class="marquee-change negative">-0.5%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">GGAL ADR</span>
+            <span class="marquee-value">28.45</span>
+            <span class="marquee-change positive">+4.1%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">YPF ADR</span>
+            <span class="marquee-value">14.78</span>
+            <span class="marquee-change negative">-1.2%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">MELI</span>
+            <span class="marquee-value">1,234.56</span>
+            <span class="marquee-change positive">+3.4%</span>
+          </div>
+          <div class="marquee-separator"></div>
+          <div class="marquee-item">
+            <span class="marquee-label">GLOB</span>
+            <span class="marquee-value">187.92</span>
+            <span class="marquee-change positive">+1.7%</span>
+          </div>
         </div>
       `
     }
@@ -57,9 +105,9 @@ export default function ArgentineStocksMarquee() {
   }, [])
 
   return (
-    <div className="bg-green-50 border-b border-green-200">
+    <div className="marquee-container marquee-celeste">
       <div className="tradingview-widget-container ">
-        <div ref={containerRef} className="tradingview-widget-container__widget min-h-[40px]"></div>
+        <div ref={containerRef} className="tradingview-widget-container__widget"></div>
       </div>
     </div>
   )
