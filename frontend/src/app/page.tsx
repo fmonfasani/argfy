@@ -1,6 +1,5 @@
-// frontend/src/app/page.tsx
 'use client'
-import { useState} from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import EconomicDataCards from '@/components/EconomicDataCards'
 import DailyEconomicData from '@/components/DailyEconomicData'
@@ -16,9 +15,7 @@ import DashboardModal from '@/components/DashboardModal'
 
 export default function HomePage() {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false)
-  const [indicators, setIndicators] = useState([])
 
-  // Función para abrir el dashboard
   const openDashboard = () => {
     setIsDashboardOpen(true)
   }
@@ -26,8 +23,24 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 min-h-screen py-16">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 min-h-[85vh] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Hero Content */}
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                Datos económicos
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+                Argentinos en tiempo real
+              </span>
+            </h1>
+            <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
+              Accede a indicadores clave, análisis y proyecciones del mercado argentino. 
+              API confiable para desarrolladores y traders.
+            </p>
+          </div>
           
           {/* Data Category Cards */}
           <EconomicDataCards />
@@ -36,7 +49,7 @@ export default function HomePage() {
           <div className="text-center space-x-4 mt-16">
             <button 
               onClick={openDashboard}
-              className="inline-flex items-center px-8 py-4 bg-white text-slate-800 font-semibold rounded-xl hover:bg-slate-100 transition-all transform hover:scale-105 shadow-xl border border-slate-200"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-semibold rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all transform hover:scale-105 shadow-xl"
             >
               <span className="mr-2">📊</span>
               Ver Dashboard
@@ -52,34 +65,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Banks Section */}
+      {/* Resto del contenido */}
       <BanksSection />
-
-      {/* Government Section */}
       <GovernmentSection />
-
-      {/* BCRA Section */}
       <BCRASection />
-
-      {/* Economics Section */}
       <EconomicsSection />
-
-      {/* Finances Section */}
       <FinancesSection />
-
-      {/* Markets Section */}
       <MarketsSection />
-
-      {/* Daily Economic Data Section */}
-      {<DailyEconomicData />}
-
-      {/* News Section */}
+      <DailyEconomicData />
       <NewsSection />
-
-      {/* Footer */}
       <Footer />
 
-      {/* Dashboard Modal */}
       <DashboardModal 
         isOpen={isDashboardOpen}
         onClose={() => setIsDashboardOpen(false)}

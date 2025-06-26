@@ -1,3 +1,5 @@
 __pycache__/
 *.py[cod]
 backend/data/
+/node_modules/
+*node_modules
