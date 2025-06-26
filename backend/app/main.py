@@ -129,6 +129,10 @@ async def not_found_handler(request, exc):
             ]
         }
     )
+@app.on_event("startup")
+async def startup_event():
+    if os.getenv("ENVIRONMENT") == "production":
+        asyncio.create_task(ping_self())
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):

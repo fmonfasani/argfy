@@ -8,3 +8,5 @@ backend/data/
 # mypy cache
 .mypy_cache/
 venv/
+.env.production
+.env.development
