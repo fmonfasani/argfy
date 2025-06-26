@@ -392,39 +392,56 @@ def generate_historical_data(indicator_type: str, days: int = 30):
     return historical_data
 
 def generate_demo_news():
-    """Genera noticias de demo"""
-    news_templates = [
+    """Genera noticias de demo - versión corregida para el modelo real"""
+    demo_news = [
         {
-            'title': 'BCRA mantiene tasa de política monetaria en {}%',
-            'content': 'El Banco Central decidió mantener la tasa de política monetaria en su nivel actual como parte de su estrategia de estabilización.',
+            'title': 'BCRA mantiene tasa de política monetaria en 118.0%',
+            'summary': 'El Banco Central decidió mantener la tasa de política monetaria en su nivel actual como parte de su estrategia de estabilización.',
             'category': 'monetary_policy',
-            'importance': 'high'
+            'source': 'demo',
+            'url': 'https://demo.argfy.com/news/1',
+            'published_at': datetime.now() - timedelta(hours=0),
+            'is_featured': True
         },
         {
-            'title': 'Reservas internacionales alcanzan USD {} millones',
-            'content': 'Las reservas del BCRA muestran una evolución positiva en el contexto actual del mercado cambiario.',
+            'title': 'Reservas internacionales alcanzan USD 21,500 millones',
+            'summary': 'Las reservas del BCRA muestran una evolución positiva en el contexto actual del mercado cambiario.',
             'category': 'reserves',
-            'importance': 'medium'
+            'source': 'demo',
+            'url': 'https://demo.argfy.com/news/2',
+            'published_at': datetime.now() - timedelta(hours=6),
+            'is_featured': False
         },
         {
-            'title': 'Inflación mensual se ubicó en {}% en el último período',
-            'content': 'El INDEC reportó los últimos datos de inflación mensual, mostrando la evolución de los precios en la economía.',
+            'title': 'Inflación mensual se ubicó en 4.2% en el último período',
+            'summary': 'El INDEC reportó los últimos datos de inflación mensual, mostrando la evolución de los precios en la economía.',
             'category': 'inflation',
-            'importance': 'high'
+            'source': 'demo',
+            'url': 'https://demo.argfy.com/news/3',
+            'published_at': datetime.now() - timedelta(hours=12),
+            'is_featured': True
         },
         {
-            'title': 'Dólar blue cotiza en torno a los ${}',
-            'content': 'El mercado paralelo del dólar continúa con su dinámica habitual en las cuevas del microcentro porteño.',
+            'title': 'Dólar blue cotiza en torno a los $1,180',
+            'summary': 'El mercado paralelo del dólar continúa con su dinámica habitual en las cuevas del microcentro porteño.',
             'category': 'exchange_rate',
-            'importance': 'medium'
+            'source': 'demo',
+            'url': 'https://demo.argfy.com/news/4',
+            'published_at': datetime.now() - timedelta(hours=18),
+            'is_featured': False
         },
         {
             'title': 'Merval cierra con tendencia positiva',
-            'content': 'Los principales paneles de la Bolsa de Comercio de Buenos Aires mostraron una jornada favorable para los inversores.',
+            'summary': 'Los principales paneles de la Bolsa de Comercio de Buenos Aires mostraron una jornada favorable para los inversores.',
             'category': 'stock_market',
-            'importance': 'low'
+            'source': 'demo',
+            'url': 'https://demo.argfy.com/news/5',
+            'published_at': datetime.now() - timedelta(hours=24),
+            'is_featured': False
         }
     ]
+    
+    return demo_news
     
     demo_news = []
     
