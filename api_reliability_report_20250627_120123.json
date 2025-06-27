@@ -1,0 +1,269 @@
+{
+  "timestamp": "2025-06-27T12:00:36.494767",
+  "apis_tested": 9,
+  "apis_working": 6,
+  "apis_failed": 3,
+  "detailed_results": {
+    "bcra_variables": {
+      "name": "BCRA Variables Monetarias",
+      "url": "https://api.bcra.gob.ar/estadisticas/v3.0/Monetarias",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": NaN,
+          "min_time": Infinity,
+          "max_time": Infinity,
+          "success_rate": 0.0,
+          "rating": "poor"
+        },
+        "test_data_quality": {
+          "status": "failed",
+          "reason": "Cannot connect to host api.bcra.gob.ar:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1028)')]"
+        }
+      },
+      "overall_rating": "poor",
+      "recommendations": [
+        "\ud83d\udcc5 Sin datos recientes - verificar actualizaci\u00f3n",
+        "\ud83d\udd0d Baja consistencia - validaci\u00f3n de datos necesaria"
+      ]
+    },
+    "bcra_cotizaciones": {
+      "name": "BCRA Cotizaciones",
+      "url": "https://api.bcra.gob.ar/estadisticascambiarias/v1.0/Cotizaciones",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": NaN,
+          "min_time": Infinity,
+          "max_time": Infinity,
+          "success_rate": 0.0,
+          "rating": "poor"
+        },
+        "test_data_quality": {
+          "status": "failed",
+          "reason": "Cannot connect to host api.bcra.gob.ar:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1028)')]"
+        }
+      },
+      "overall_rating": "poor",
+      "recommendations": [
+        "\ud83d\udcc5 Sin datos recientes - verificar actualizaci\u00f3n",
+        "\ud83d\udd0d Baja consistencia - validaci\u00f3n de datos necesaria"
+      ]
+    },
+    "series_tiempo_ipc": {
+      "name": "Series Tiempo - IPC",
+      "url": "https://apis.datos.gob.ar/series/api/series/?ids=143.3_INDEC_PAPERI_IPC_0_0_13&format=json",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.34308354059855145,
+          "min_time": 0.29913330078125,
+          "max_time": 0.4303922653198242,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_data_format": {
+          "status": "failed",
+          "reason": "HTTP 400"
+        }
+      },
+      "overall_rating": "excellent",
+      "recommendations": []
+    },
+    "series_tiempo_base_monetaria": {
+      "name": "Series Tiempo - Base Monetaria",
+      "url": "https://apis.datos.gob.ar/series/api/series/?ids=sspm_174.1_BaseMonetaria&format=json",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.2897348403930664,
+          "min_time": 0.275653600692749,
+          "max_time": 0.3110535144805908,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_data_format": {
+          "status": "failed",
+          "reason": "HTTP 400"
+        }
+      },
+      "overall_rating": "excellent",
+      "recommendations": []
+    },
+    "series_tiempo_emae": {
+      "name": "Series Tiempo - EMAE",
+      "url": "https://apis.datos.gob.ar/series/api/series/?ids=143.3_EMAE_DSM_DC0_0_48&format=json",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.29476483662923175,
+          "min_time": 0.26689577102661133,
+          "max_time": 0.34805989265441895,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_data_format": {
+          "status": "failed",
+          "reason": "HTTP 400"
+        }
+      },
+      "overall_rating": "excellent",
+      "recommendations": []
+    },
+    "mecon_fiscal": {
+      "name": "MECON - Resultado Fiscal",
+      "url": "https://www.economia.gob.ar/datos/result_fiscal_mensual.csv",
+      "type": "oficial",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.05049029986063639,
+          "min_time": 0.01658916473388672,
+          "max_time": 0.11473560333251953,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_csv_format": {
+          "status": "failed",
+          "reason": "HTTP 404"
+        }
+      },
+      "overall_rating": "excellent",
+      "recommendations": []
+    },
+    "argentinadatos_riesgo": {
+      "name": "Argentinadatos - Riesgo Pa\u00eds",
+      "url": "https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais",
+      "type": "comunitario",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.2737433115641276,
+          "min_time": 0.09717345237731934,
+          "max_time": 0.6197397708892822,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_data_quality": {
+          "has_expected_fields": true,
+          "missing_fields": [],
+          "data_points_count": 7384,
+          "has_recent_data": false,
+          "data_consistency": 1.0,
+          "rating": "good"
+        },
+        "test_reliability": {
+          "attempts": [
+            {
+              "attempt": 1,
+              "success": true,
+              "response_time": 0.10232830047607422,
+              "status_code": 200
+            },
+            {
+              "attempt": 2,
+              "success": true,
+              "response_time": 0.48401618003845215,
+              "status_code": 200
+            },
+            {
+              "attempt": 3,
+              "success": true,
+              "response_time": 0.4784047603607178,
+              "status_code": 200
+            },
+            {
+              "attempt": 4,
+              "success": true,
+              "response_time": 0.2088909149169922,
+              "status_code": 200
+            },
+            {
+              "attempt": 5,
+              "success": true,
+              "response_time": 0.23110270500183105,
+              "status_code": 200
+            }
+          ],
+          "success_rate": 1.0,
+          "avg_response_time": 0.3009485721588135,
+          "reliability_score": 1.0,
+          "rating": "excellent"
+        }
+      },
+      "overall_rating": "good",
+      "recommendations": [
+        "\ud83d\udcc5 Sin datos recientes - verificar actualizaci\u00f3n",
+        "\ud83d\udd04 API comunitaria - considerar fuente oficial como backup"
+      ]
+    },
+    "argentinadatos_dolar": {
+      "name": "Argentinadatos - D\u00f3lar Blue",
+      "url": "https://api.argentinadatos.com/v1/finanzas/cotizaciones/dolar/blue",
+      "type": "comunitario",
+      "auth_required": false,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.2224283218383789,
+          "min_time": 0.05363798141479492,
+          "max_time": 0.5549068450927734,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_data_quality": {
+          "status": "failed",
+          "reason": "HTTP 404"
+        }
+      },
+      "overall_rating": "excellent",
+      "recommendations": [
+        "\ud83d\udcc5 Sin datos recientes - verificar actualizaci\u00f3n",
+        "\ud83d\udd0d Baja consistencia - validaci\u00f3n de datos necesaria",
+        "\ud83d\udd04 API comunitaria - considerar fuente oficial como backup"
+      ]
+    },
+    "estadisticasbcra_reservas": {
+      "name": "Estad\u00edsticasBCRA - Reservas",
+      "url": "https://api.estadisticasbcra.com/reservas",
+      "type": "wrapper",
+      "auth_required": true,
+      "tests_results": {
+        "test_response_time": {
+          "avg_response_time": 0.3858366012573242,
+          "min_time": 0.22322368621826172,
+          "max_time": 0.7093734741210938,
+          "success_rate": 1.0,
+          "rating": "excellent"
+        },
+        "test_auth_requirement": {
+          "status_without_auth": 403,
+          "requires_auth": true,
+          "accessible": false,
+          "response_headers": {
+            "Date": "Fri, 27 Jun 2025 15:01:20 GMT",
+            "Content-Type": "text/plain; charset=utf-8",
+            "Content-Length": "38",
+            "Connection": "keep-alive",
+            "X-Content-Type-Options": "nosniff",
+            "X-XSS-Protection": "1; mode=block",
+            "X-Frame-Options": "SAMEORIGIN"
+          },
+          "rating": "needs_setup"
+        }
+      },
+      "overall_rating": "fair",
+      "recommendations": [
+        "\ud83d\udd10 Requiere autenticaci\u00f3n - configurar tokens"
+      ]
+    }
+  },
+  "recommendations": [
+    "\u26a0\ufe0f Cobertura buena - implementar con monitoreo",
+    "\ud83c\udfdb\ufe0f Suficientes fuentes oficiales - priorizar estas"
+  ]
+}

@@ -5,11 +5,21 @@ from fastapi.responses import JSONResponse
 from .routers import indicators
 from .database import engine, Base, init_db
 from datetime import datetime
+from app.routers import bcra_real
+from app.services.bcra_scheduler import BCRAScheduler
+import threading
+import os
 #import asyncio
 import os
 
 # Crear tablas si no existen
 init_db()
+app.include_router(bcra_real.router)
+
+if os.getenv("ENABLE_BCRA_SCHEDULER", "false").lower() == "true":
+    scheduler = BCRAScheduler()
+    scheduler_thread = threading.Thread(target=scheduler.start, daemon=True)
+    scheduler_thread.start()
 
 app = FastAPI(
     title="Argfy API",
@@ -49,6 +59,8 @@ app = FastAPI(
     },
 )
 
+
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -67,6 +79,8 @@ app.add_middleware(
 # Incluir routers
 app.include_router(indicators.router, prefix="/api/v1")
 
+
+
 @app.get("/", tags=["root"])
 async def root():
     """Endpoint raíz de la API"""
@@ -75,6 +89,8 @@ async def root():
         "status": "active",
         "docs": "/docs",
         "timestamp": datetime.utcnow().isoformat(),
+        "bcra_integration": "ACTIVE",
+        "data_sources": ["BCRA_OFICIAL", "TIEMPO_REAL"],
         "endpoints": {
             "current_indicators": "/api/v1/indicators/current",
             "historical_data": "/api/v1/indicators/historical/{indicator}",
@@ -130,10 +146,11 @@ async def not_found_handler(request, exc):
             ]
         }
     )
-#@app.on_event("startup")
-#async def startup_event():
-#    if os.getenv("ENVIRONMENT") == "production":
-#        asyncio.create_task(ping_self())
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Argfy Platform con datos BCRA REALES iniciado")
+    if os.getenv("ENVIRONMENT") == "production":
+        asyncio.create_task(ping_self())
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
