@@ -7,14 +7,16 @@ from .database import engine, Base, init_db
 from datetime import datetime
 from app.routers import bcra_real
 from app.services.bcra_scheduler import BCRAScheduler
+from app.routers import bcra_real
 import threading
 import os
 #import asyncio
-import os
+from app.routers import unified_economic
+
 
 # Crear tablas si no existen
 init_db()
-app.include_router(bcra_real.router)
+
 
 if os.getenv("ENABLE_BCRA_SCHEDULER", "false").lower() == "true":
     scheduler = BCRAScheduler()
@@ -59,7 +61,8 @@ app = FastAPI(
     },
 )
 
-
+app.include_router(bcra_real.router)
+app.include_router(unified_economic.router)
 
 # CORS Configuration
 app.add_middleware(
