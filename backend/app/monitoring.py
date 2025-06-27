@@ -1,27 +1,19 @@
 # backend/app/monitoring.py
-"""
-Sistema de monitoreo y logging para Argfy
-"""
-import logging
 import time
-from datetime import datetime
-from functools import wraps
-from typing import Dict, Any
-import json
+import logging
+from typing import Dict, List, Optional
+from datetime import datetime, timedelta
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-import psutil
-import asyncio
+import json
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/argfy.log'),
-        logging.StreamHandler()
-    ]
-)
+# Import psutil de forma opcional
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    print("⚠️ psutil no disponible - algunas métricas de sistema deshabilitadas")
 
 logger = logging.getLogger(__name__)
 
@@ -32,21 +24,17 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         
         # Log request
-        logger.info(f"🔍 {request.method} {request.url.path} - {request.client.host}")
+        logger.info(f"📥 {request.method} {request.url}")
         
+        # Process request
         response = await call_next(request)
         
-        # Calcular tiempo de respuesta
+        # Calculate processing time
         process_time = time.time() - start_time
+        response.headers["X-Process-Time"] = str(process_time)
         
         # Log response
-        logger.info(
-            f"✅ {request.method} {request.url.path} - "
-            f"{response.status_code} - {process_time:.3f}s"
-        )
-        
-        # Agregar header de tiempo de respuesta
-        response.headers["X-Process-Time"] = str(process_time)
+        logger.info(f"📤 {response.status_code} - {process_time:.4f}s")
         
         return response
 
@@ -54,118 +42,97 @@ class PerformanceMonitor:
     """Monitor de performance del sistema"""
     
     def __init__(self):
+        self.requests_count = 0
+        self.total_time = 0.0
         self.start_time = datetime.now()
-        self.request_count = 0
-        self.error_count = 0
         
-    def log_request(self):
-        """Registrar una request"""
-        self.request_count += 1
-        
-    def log_error(self):
-        """Registrar un error"""
-        self.error_count += 1
-        
-    def get_system_metrics(self) -> Dict[str, Any]:
+    def record_request(self, duration: float):
+        """Registrar tiempo de request"""
+        self.requests_count += 1
+        self.total_time += duration
+    
+    def get_system_metrics(self) -> Dict:
         """Obtener métricas del sistema"""
-        return {
-            "uptime": str(datetime.now() - self.start_time),
-            "request_count": self.request_count,
-            "error_count": self.error_count,
-            "error_rate": self.error_count / max(self.request_count, 1) * 100,
-            "cpu_percent": psutil.cpu_percent(),
-            "memory_percent": psutil.virtual_memory().percent,
-            "disk_percent": psutil.disk_usage('/').percent,
-            "timestamp": datetime.now().isoformat()
+        metrics = {
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": (datetime.now() - self.start_time).total_seconds(),
+            "requests_total": self.requests_count,
+            "avg_response_time": self.total_time / max(self.requests_count, 1),
         }
+        
+        # Agregar métricas de psutil solo si está disponible
+        if PSUTIL_AVAILABLE:
+            try:
+                # CPU y memoria
+                metrics.update({
+                    "cpu_percent": psutil.cpu_percent(interval=1),
+                    "memory_percent": psutil.virtual_memory().percent,
+                    "memory_available_mb": psutil.virtual_memory().available / 1024 / 1024,
+                    "disk_usage_percent": psutil.disk_usage('/').percent,
+                })
+            except Exception as e:
+                logger.warning(f"Error obteniendo métricas psutil: {e}")
+        else:
+            # Métricas básicas sin psutil
+            metrics.update({
+                "cpu_percent": "N/A (psutil no disponible)",
+                "memory_percent": "N/A (psutil no disponible)", 
+                "memory_available_mb": "N/A (psutil no disponible)",
+                "disk_usage_percent": "N/A (psutil no disponible)",
+            })
+        
+        return metrics
+    
+    def get_health_status(self) -> Dict:
+        """Estado de salud del sistema"""
+        status = {
+            "status": "healthy",
+            "checks": {
+                "uptime": "ok",
+                "requests": "ok" if self.requests_count > 0 else "no_requests"
+            }
+        }
+        
+        # Checks adicionales con psutil
+        if PSUTIL_AVAILABLE:
+            try:
+                cpu_percent = psutil.cpu_percent(interval=0.1)
+                memory_percent = psutil.virtual_memory().percent
+                
+                status["checks"].update({
+                    "cpu": "ok" if cpu_percent < 80 else "high",
+                    "memory": "ok" if memory_percent < 80 else "high"
+                })
+                
+                # Estado general
+                if cpu_percent > 90 or memory_percent > 90:
+                    status["status"] = "degraded"
+                    
+            except Exception as e:
+                status["checks"]["system_metrics"] = f"error: {e}"
+        else:
+            status["checks"]["system_metrics"] = "psutil_not_available"
+        
+        return status
 
 # Instancia global del monitor
 performance_monitor = PerformanceMonitor()
 
-def log_performance(func_name: str = None):
-    """Decorador para logging de performance"""
-    def decorator(func):
-        @wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            start_time = time.time()
-            function_name = func_name or func.__name__
-            
-            try:
-                result = await func(*args, **kwargs)
-                execution_time = time.time() - start_time
-                logger.info(f"⚡ {function_name} completed in {execution_time:.3f}s")
-                return result
-            except Exception as e:
-                execution_time = time.time() - start_time
-                logger.error(f"❌ {function_name} failed in {execution_time:.3f}s: {str(e)}")
-                performance_monitor.log_error()
-                raise
-                
-        @wraps(func)
-        def sync_wrapper(*args, **kwargs):
-            start_time = time.time()
-            function_name = func_name or func.__name__
-            
-            try:
-                result = func(*args, **kwargs)
-                execution_time = time.time() - start_time
-                logger.info(f"⚡ {function_name} completed in {execution_time:.3f}s")
-                return result
-            except Exception as e:
-                execution_time = time.time() - start_time
-                logger.error(f"❌ {function_name} failed in {execution_time:.3f}s: {str(e)}")
-                performance_monitor.log_error()
-                raise
-        
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
-    return decorator
+def get_performance_metrics() -> Dict:
+    """Función helper para obtener métricas"""
+    return performance_monitor.get_system_metrics()
 
-class HealthChecker:
-    """Verificador de salud del sistema"""
-    
-    @staticmethod
-    def check_database():
-        """Verificar conexión a base de datos"""
-        try:
-            from .database import engine
-            with engine.connect() as conn:
-                conn.execute("SELECT 1")
-            return {"status": "healthy", "message": "Database connection OK"}
-        except Exception as e:
-            return {"status": "unhealthy", "message": f"Database error: {str(e)}"}
-    
-    @staticmethod
-    def check_external_apis():
-        """Verificar APIs externas"""
-        try:
-            import requests
-            response = requests.get("https://api.bcra.gob.ar", timeout=5)
-            if response.status_code < 500:
-                return {"status": "healthy", "message": "External APIs accessible"}
-            else:
-                return {"status": "degraded", "message": "External APIs slow"}
-        except Exception as e:
-            return {"status": "unhealthy", "message": f"External API error: {str(e)}"}
-    
-    @staticmethod
-    def get_health_status():
-        """Obtener estado completo de salud"""
-        checks = {
-            "database": HealthChecker.check_database(),
-            "external_apis": HealthChecker.check_external_apis(),
-            "system_metrics": performance_monitor.get_system_metrics()
-        }
-        
-        # Determinar estado general
-        overall_status = "healthy"
-        if any(check["status"] == "unhealthy" for check in checks.values()):
-            overall_status = "unhealthy"
-        elif any(check["status"] == "degraded" for check in checks.values()):
-            overall_status = "degraded"
-        
-        return {
-            "status": overall_status,
-            "timestamp": datetime.now().isoformat(),
-            "checks": checks
-        }
+def get_health_check() -> Dict:
+    """Función helper para health check"""
+    return performance_monitor.get_health_status()
 
+# Función para verificar dependencias
+def check_monitoring_dependencies() -> Dict:
+    """Verificar qué dependencias están disponibles"""
+    return {
+        "psutil": PSUTIL_AVAILABLE,
+        "monitoring_level": "full" if PSUTIL_AVAILABLE else "basic",
+        "available_metrics": [
+            "uptime", "requests_count", "avg_response_time"
+        ] + (["cpu", "memory", "disk"] if PSUTIL_AVAILABLE else [])
+    }

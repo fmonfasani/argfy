@@ -1,35 +1,127 @@
-aiohappyeyeballs==2.6.1
-aiohttp==3.12.13
-aiosignal==1.3.2
-annotated-types==0.7.0
-anyio==4.9.0
-attrs==25.3.0
-beautifulsoup4==4.12.2
-certifi==2025.6.15
-charset-normalizer==3.4.2
-click==8.2.1
-colorama==0.4.6
+# backend/requirements.txt - VERSIÓN ACTUALIZADA Y CORREGIDA
+
+# Core FastAPI y servidor
 fastapi==0.115.13
-frozenlist==1.7.0
+uvicorn[standard]==0.34.3
+starlette==0.46.2
+
+# Base de datos
+sqlalchemy==2.0.41
 greenlet==3.2.3
+
+# HTTP clients - Stack híbrido completo
+requests==2.31.0
+httpx==0.26.0
+aiohttp==3.12.13
+aiohappyeyeballs==2.6.1
+
+# Procesamiento de datos
+pandas==2.1.4
+numpy==1.26.2
+
+# Web scraping y HTML parsing
+beautifulsoup4==4.12.2
+lxml==4.9.3
+soupsieve==2.7
+
+# Caché y Redis
+redis==5.0.1
+
+# Configuración y variables de entorno
+python-dotenv==1.0.0
+pydantic==2.11.7
+pydantic-core==2.33.2
+
+# Scheduler y tareas
+schedule==1.2.0
+celery==5.3.4  # Para tareas avanzadas en el futuro
+
+# Monitoring y logging
+psutil==5.9.6
+sentry-sdk[fastapi]==1.44.1  # Para error tracking en producción
+
+# Validación y tipos
+annotated-types==0.7.0
+typing-extensions==4.14.0
+typing-inspection==0.4.1
+
+# Networking y async
+anyio==4.9.0
 h11==0.16.0
 httpcore==1.0.9
-httpx==0.26.0
-idna==3.10
-multidict==6.5.1
-propcache==0.3.2
-pydantic==2.11.7
-pydantic_core==2.33.2
-python-dotenv==1.0.0
-redis==5.0.1
-requests==2.31.0
-schedule==1.2.0
 sniffio==1.3.1
-soupsieve==2.7
-SQLAlchemy==2.0.41
-starlette==0.46.2
-typing-inspection==0.4.1
-typing_extensions==4.14.0
+
+# SSL y certificados
+certifi==2025.6.15
+idna==3.10
+charset-normalizer==3.4.2
 urllib3==2.5.0
-uvicorn==0.34.3
+
+# Async HTTP specifics
+aiosignal==1.3.2
+frozenlist==1.7.0
+multidict==6.5.1
 yarl==1.20.1
+attrs==25.3.0
+propcache==0.3.2
+
+# CLI y utilidades
+click==8.2.1
+colorama==0.4.6
+
+# Testing y development
+pytest==7.4.4
+pytest-asyncio==0.23.2
+httpx==0.26.0  # Para testing con TestClient
+coverage==7.3.4
+
+# Formateo y linting (desarrollo)
+black==23.12.1
+flake8==7.0.0
+isort==5.13.2
+mypy==1.8.0
+
+# Documentación
+mkdocs==1.5.3
+mkdocs-material==9.5.3
+
+# Extras para funcionalidades avanzadas
+python-jose[cryptography]==3.3.0  # Para JWT en el futuro
+passlib[bcrypt]==1.7.4  # Para passwords en el futuro
+python-multipart==0.0.6  # Para file uploads
+emails==0.6  # Para notificaciones por email
+
+# Performance y optimización
+orjson==3.9.10  # JSON más rápido
+cachetools==5.3.2  # Caché en memoria avanzado
+
+# Timezone y fechas
+pytz==2023.3.post1
+python-dateutil==2.8.2
+
+# Compression y archivos
+gzip==1.0
+zipfile38==0.1.1
+
+# Extras Windows compatibility
+pywin32==306; sys_platform == "win32"
+winspeech==3.0.1; sys_platform == "win32"
+
+# Desarrollo y debugging
+python-debug==0.0.1
+memory-profiler==0.61.0
+
+# Futures y compatibilidad
+futures==3.1.1; python_version < "3.2"
+
+# Sistema operativo específico
+distro==1.9.0; sys_platform == "linux"
+
+# Nota: Para instalar solo las dependencias básicas:
+# pip install fastapi uvicorn sqlalchemy requests pandas beautifulsoup4 redis python-dotenv schedule psutil
+
+# Para instalar todo (desarrollo completo):
+# pip install -r requirements.txt
+
+# Para producción optimizada (sin dev tools):
+# pip install fastapi uvicorn sqlalchemy requests httpx aiohttp pandas beautifulsoup4 redis python-dotenv schedule psutil sentry-sdk pydantic orjsonpsutil==5.9.6
