@@ -1,0 +1,12 @@
+
+# AGREGAR ESTAS LÍNEAS AL FINAL DE app/main.py (antes del if __name__ == "__main__"):
+
+# Importar router unificado con manejo seguro de errores
+try:
+    from app.routers import unified_economic
+    app.include_router(unified_economic.router)
+    print("✅ Router unificado agregado exitosamente")
+except ImportError as e:
+    print(f"⚠️  Router unificado no disponible: {e}")
+except Exception as e:
+    print(f"❌ Error agregando router unificado: {e}")

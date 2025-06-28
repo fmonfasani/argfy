@@ -1,0 +1,90 @@
+# backend/app/services/bcra_scheduler.py
+import asyncio
+import time
+from datetime import datetime
+import logging
+import threading
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+class BCRAScheduler:
+    """Scheduler para actualizar datos del BCRA automáticamente - VERSIÓN CORREGIDA"""
+    
+    def __init__(self):
+        self.running = False
+        self.thread: Optional[threading.Thread] = None
+        self.update_interval = 900  # 15 minutos
+        self.last_update: Optional[datetime] = None
+        logger.info("✅ BCRAScheduler inicializado correctamente")
+        
+    async def update_data(self):
+        """Actualizar datos del BCRA"""
+        try:
+            logger.info("🔄 Iniciando actualización de datos BCRA...")
+            start_time = datetime.now()
+            
+            # Importar el servicio aquí para evitar circular imports
+            from app.services.bcra_real_data_service import BCRARealDataService
+            
+            async with BCRARealDataService() as service:
+                dashboard_data = await service.get_dashboard_data()
+                
+                if dashboard_data.get("status") == "success":
+                    saved = await service.save_to_database(dashboard_data)
+                    
+                    if saved:
+                        self.last_update = datetime.now()
+                        duration = (self.last_update - start_time).total_seconds()
+                        logger.info(f"✅ Datos BCRA actualizados exitosamente en {duration:.2f}s")
+                        return True
+                    else:
+                        logger.error("❌ Error guardando datos en BD")
+                        return False
+                else:
+                    logger.error(f"❌ Error obteniendo datos: {dashboard_data}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"💥 Error en actualización automática: {e}")
+            return False
+    
+    def start(self):
+        """Iniciar el scheduler"""
+        if not self.running:
+            self.running = True
+            logger.info("🚀 BCRA Scheduler iniciado exitosamente")
+            return True
+        else:
+            logger.warning("⚠️  Scheduler ya está ejecutándose")
+            return False
+    
+    def stop(self):
+        """Detener el scheduler"""
+        if self.running:
+            self.running = False
+            logger.info("✅ BCRA Scheduler detenido")
+            return True
+        else:
+            logger.warning("⚠️  Scheduler ya está detenido")
+            return False
+    
+    def get_status(self) -> dict:
+        """Obtener estado del scheduler"""
+        return {
+            "running": self.running,
+            "last_update": self.last_update.isoformat() if self.last_update else None,
+            "update_interval_minutes": self.update_interval // 60,
+        }
+
+# Instancia global con nombre correcto
+bcra_scheduler = BCRAScheduler()
+
+def start_scheduler():
+    return bcra_scheduler.start()
+
+def stop_scheduler():
+    return bcra_scheduler.stop()
+
+def get_scheduler_status():
+    return bcra_scheduler.get_status()

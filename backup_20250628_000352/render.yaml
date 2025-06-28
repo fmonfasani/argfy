@@ -1,0 +1,27 @@
+# render.yaml - Configuración corregida
+services:
+  - type: web
+    name: argfy-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && mkdir -p data && python scripts/init_database.py
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: DATABASE_URL
+        value: "sqlite:///./data/argentina.db"
+      - key: ENVIRONMENT
+        value: "production"
+      - key: DEBUG
+        value: "false"
+      - key: ENABLE_REAL_DATA
+        value: "true"
+      - key: SECRET_KEY
+        value: "production-secret-key-change-this"
+      - key: CORS_ORIGINS
+        value: '["https://argfy-platform.vercel.app", "https://*.vercel.app", "http://localhost:3000"]'
+    healthCheckPath: /health
+    autoDeploy: true
