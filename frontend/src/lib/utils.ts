@@ -1,5 +1,12 @@
 // frontend/src/lib/utils.ts - Modificar funciones de formato
 
+
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 export function formatNumber(value: number, withSeparator: boolean = false): string {
   if (withSeparator) {
     return new Intl.NumberFormat('es-AR').format(value)
@@ -8,7 +15,6 @@ export function formatNumber(value: number, withSeparator: boolean = false): str
     return value.toString()
   }
 }
-
 export function formatCurrency(value: number, currency: string = 'ARS', showSymbol: boolean = false): string {
   if (showSymbol) {
     return new Intl.NumberFormat('es-AR', {
@@ -23,6 +29,39 @@ export function formatCurrency(value: number, currency: string = 'ARS', showSymb
   }
 }
 
+export function formatPercentage(value: number, decimals: number = 1): string {
+  return `${value.toFixed(decimals)}%`
+}
+
+export function getTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+  const diffInDays = Math.floor(diffInHours / 24)
+  
+  if (diffInHours < 1) return 'Hace menos de 1 hora'
+  if (diffInHours < 24) return `Hace ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`
+  if (diffInDays < 7) return `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`
+  
+  const diffInWeeks = Math.floor(diffInDays / 7)
+  return `Hace ${diffInWeeks} semana${diffInWeeks > 1 ? 's' : ''}`
+}
+
+export function getIndicatorColor(type: string, value?: number): string {
+  const baseColors = {
+    'dolar_blue': 'text-emerald-600',
+    'dolar_oficial': 'text-blue-600',
+    'dolar_mep': 'text-purple-600',
+    'inflacion_mensual': 'text-red-600',
+    'reservas_bcra': 'text-emerald-600',
+    'riesgo_pais': 'text-amber-600',
+    'tasa_bcra': 'text-slate-700',
+    'merval': 'text-green-600'
+  }
+  
+  return baseColors[type as keyof typeof baseColors] || 'text-slate-700'
+}
 export function getIndicatorDisplayValue(indicator: any, simple: boolean = false): string {
   if (simple) {
     // Formato simple sin separadores ni símbolos
@@ -42,8 +81,5 @@ export function getIndicatorDisplayValue(indicator: any, simple: boolean = false
       default:
         return indicator.value.toString()
     }
-  } else {
-    // Formato original con símbolos
-    return getIndicatorDisplayValueOriginal(indicator)
-  }
+  } 
 }
