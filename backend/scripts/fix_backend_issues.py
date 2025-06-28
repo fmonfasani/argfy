@@ -75,15 +75,15 @@ class BackendFixer:
             self.log_fix("Removed duplicate bcra_real import", str(main_py_path))
         
         # Check for BCRAScheduler import issues
-        if "from app.services.bcra_scheduler import BCRAScheduler" in content:
+        if "from app.services.scheduler import BCRAScheduler" in content:
             self.log_issue("wrong_scheduler_import", "Wrong scheduler class name imported", str(main_py_path))
             
             # Fix scheduler import
             content = content.replace(
-                "from app.services.bcra_scheduler import BCRAScheduler",
-                "from app.services.bcra_scheduler import bcra_scheduler, start_scheduler, get_scheduler_status"
+                "from app.services.scheduler import BCRAScheduler",
+                "from app.services.scheduler import scheduler, start_scheduler, get_scheduler_status"
             )
-            content = content.replace("BCRAScheduler()", "bcra_scheduler")
+            content = content.replace("BCRAScheduler()", "scheduler")
             self.log_fix("Fixed scheduler import and usage", str(main_py_path))
         
         # Write back fixed content
@@ -91,14 +91,14 @@ class BackendFixer:
             f.write(content)
     
     def check_scheduler_issues(self):
-        """Check and fix bcra_scheduler.py issues"""
-        scheduler_path = self.base_path / "app" / "services" / "bcra_scheduler.py"
+        """Check and fix scheduler.py issues"""
+        scheduler_path = self.base_path / "app" / "services" / "scheduler.py"
         
         if not scheduler_path.exists():
-            self.log_error("bcra_scheduler.py not found")
+            self.log_error("scheduler.py not found")
             return
         
-        print("\n🔍 Checking bcra_scheduler.py...")
+        print("\n🔍 Checking scheduler.py...")
         
         with open(scheduler_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -236,9 +236,9 @@ class BackendFixer:
     
     def fix_scheduler_file(self):
         """Replace scheduler file with corrected version"""
-        scheduler_path = self.base_path / "app" / "services" / "bcra_scheduler.py"
+        scheduler_path = self.base_path / "app" / "services" / "scheduler.py"
         
-        corrected_scheduler = '''# backend/app/services/bcra_scheduler.py
+        corrected_scheduler = '''# backend/app/services/scheduler.py
 import asyncio
 import time
 from datetime import datetime
@@ -265,9 +265,9 @@ class BCRAScheduler:
             start_time = datetime.now()
             
             # Importar el servicio aquí para evitar circular imports
-            from app.services.bcra_real_data_service import BCRARealDataService
+            from app.services.bcra_service import BCRAService
             
-            async with BCRARealDataService() as service:
+            async with BCRAService() as service:
                 dashboard_data = await service.get_dashboard_data()
                 
                 if dashboard_data.get("status") == "success":
@@ -318,16 +318,16 @@ class BCRAScheduler:
         }
 
 # Instancia global con nombre correcto
-bcra_scheduler = BCRAScheduler()
+scheduler = BCRAScheduler()
 
 def start_scheduler():
-    return bcra_scheduler.start()
+    return scheduler.start()
 
 def stop_scheduler():
-    return bcra_scheduler.stop()
+    return scheduler.stop()
 
 def get_scheduler_status():
-    return bcra_scheduler.get_status()
+    return scheduler.get_status()
 '''
         
         # Backup original file
@@ -374,7 +374,7 @@ def get_scheduler_status():
             print("✅ Main app imports successfully")
             
             # Test scheduler
-            from app.services.bcra_scheduler import bcra_scheduler, start_scheduler
+            from app.services.scheduler import scheduler, start_scheduler
             print("✅ Scheduler imports successfully")
             
         except Exception as e:

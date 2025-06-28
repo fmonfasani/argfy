@@ -10,3 +10,4 @@ backend/data/
 venv/
 .env.production
 .env.development
+.venv/

@@ -18,7 +18,7 @@ async def test_cards_system():
     print("🧪 Testing Cards System...")
     
     try:
-        from app.services.enhanced_economic_service import enhanced_economic_service
+        from app.services.bcra_service import enhanced_economic_service
         
         async with enhanced_economic_service as service:
             # Test 1: Obtener cards

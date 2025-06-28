@@ -346,7 +346,7 @@ class EconomicCard:
             "minutes_since_update": int((datetime.now() - self.last_updated).total_seconds() / 60)
         }
 
-class EnhancedEconomicService:
+class BCRAService:
     """Servicio económico mejorado con cards y gráficos"""
     
     def __init__(self):
@@ -588,7 +588,7 @@ class EnhancedEconomicService:
         return (variance ** 0.5) / mean * 100  # CV en porcentaje
 
 # Instancia global
-enhanced_economic_service = EnhancedEconomicService()
+enhanced_economic_service = BCRAService()
 '''
         
         with open(service_path, 'w', encoding='utf-8') as f:
@@ -665,7 +665,7 @@ enhanced_economic_service = EnhancedEconomicService()
             print("✅ Router de Cards importado exitosamente")
             
             # Test servicio mejorado
-            from app.services.enhanced_economic_service import enhanced_economic_service
+            from app.services.bcra_service import enhanced_economic_service
             print("✅ Enhanced Economic Service importado exitosamente")
             
             # Test main app
@@ -701,7 +701,7 @@ async def test_cards_system():
     print("🧪 Testing Cards System...")
     
     try:
-        from app.services.enhanced_economic_service import enhanced_economic_service
+        from app.services.bcra_service import enhanced_economic_service
         
         async with enhanced_economic_service as service:
             # Test 1: Obtener cards

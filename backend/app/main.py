@@ -1,488 +1,216 @@
-# backend/app/main.py - VERSIÓN COMPLETA CON CARDS INTEGRADAS
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from datetime import datetime
-import threading
-import os
+# backend/app/main.py
+"""
+FastAPI Application Principal – limpio y compatible
+"""
+
+from __future__ import annotations
+
 import asyncio
 import logging
+import logging.config
+from contextlib import asynccontextmanager
+from datetime import datetime
+from app.utils.emoji_log import e   
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
 
-# Importaciones de la aplicación
-from .database import engine, Base, init_db
-from .routers import indicators, bcra_real, unified_economic
-from .services.bcra_scheduler import bcra_scheduler, start_scheduler, get_scheduler_status
-from .monitoring import RequestLoggingMiddleware, performance_monitor
+from .config import settings
+from .database import Base, engine, get_db
+from .routers import health, indicators, system
+from .services.scheduler import scheduler, start_scheduler, stop_scheduler
 
-# ✅ NUEVA IMPORTACIÓN: Router de Cards Económicas
-try:
-    from .routers import economic_cards
-    CARDS_ROUTER_AVAILABLE = True
-    logger.info("✅ Economic Cards router disponible")
-except ImportError as e:
-    CARDS_ROUTER_AVAILABLE = False
-    logger.warning(f"⚠️ Economic Cards router no disponible: {e}")
+# --- IMPORTS CORREGIDOS (clases, no módulos) ------------------------------
+from .middleware.logging_middleware import LoggingMiddleware      # ← cambio
+from .middleware.rate_limit_middleware import RateLimitMiddleware  # ← cambio
 
-# Crear tablas si no existen
-init_db()
+# ------------------------------------------------------------------------- #
+# Logging
+logging.config.dictConfig(settings.log_config)
+logger = logging.getLogger("argfy.main")
 
-# Crear la aplicación FastAPI
+# -------------------------- Lifespan ------------------------------------- #
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("🚀 Starting Argfy Platform...")
+    try:
+        # 1. Crear tablas
+        logger.info("📦 Creating database tables...")
+        Base.metadata.create_all(bind=engine)
+
+        # 2. Datos demo
+        if settings.DEMO_MODE:
+            await initialize_demo_data()
+
+        # 3. Scheduler
+        if settings.ENABLE_SCHEDULER:
+            logger.info("⏰ Starting background scheduler...")
+            asyncio.create_task(start_scheduler())
+
+        logger.info("✅ Argfy Platform started successfully")
+        yield
+
+    except Exception as exc:
+        logger.exception("❌ Failed to start application: %s", exc)
+        raise
+
+    # --- shutdown ----
+    logger.info("🛑 Shutting down Argfy Platform...")
+    if settings.ENABLE_SCHEDULER:
+        stop_scheduler()
+    logger.info("✅ Argfy Platform shut down successfully")
+
+
+# ---------------------- FastAPI instancia -------------------------------- #
 app = FastAPI(
-    title="Argfy API - Datos Económicos Argentinos",
-    description="""
-    # 🚀 API Completa de Datos Económicos Argentinos
-    
-    Plataforma integral de datos económicos argentinos en tiempo real con **cards dinámicas** 
-    y **gráficos interactivos** para desarrolladores, traders y analistas.
-    
-    ## ✨ Funcionalidades Principales
-    - **📊 Cards Económicas**: Indicadores en tiempo real con sparklines
-    - **📈 Gráficos Históricos**: Visualizaciones elegantes y suavizadas  
-    - **🔄 Actualización Automática**: Datos frescos cada 15 minutos
-    - **🎯 Modales Interactivos**: Análisis detallado al hacer click
-    - **📱 API RESTful**: Endpoints documentados y optimizados
-    
-    ## 🎨 Nuevas Cards Implementadas
-    - **💵 USD Oficial**: Cotización BCRA con tendencia
-    - **💙 Dólar Blue**: Multi-fuente con volatilidad
-    - **🏦 Reservas BCRA**: En tiempo real con históricos
-    - **📊 Tasa BCRA**: Política monetaria actualizada
-    - **📉 Inflación**: INDEC con proyecciones
-    - **⚠️ Riesgo País**: EMBI+ con alertas
-    - **📊 Merval**: Índice bursátil en vivo
-    - **📈 Criptos ARG**: Exchanges locales
-    
-    ## 📊 Fuentes de Datos Oficiales
-    - **BCRA**: Banco Central de la República Argentina
-    - **INDEC**: Instituto Nacional de Estadística y Censos  
-    - **Bluelytics**: Cotizaciones dólar paralelo
-    - **BYMA**: Bolsas y Mercados Argentinos
-    - **JP Morgan**: Índice de Riesgo País EMBI+
-    
-    ## 🔥 Arquitectura Híbrida HTTP
-    - **requests**: Scraping robusto y fallbacks
-    - **httpx**: APIs REST modernas y eficientes
-    - **aiohttp**: Concurrencia masiva para 100+ endpoints
-    
-    ## 🔜 Próximamente
-    - Autenticación con API Keys
-    - Webhooks para notificaciones en tiempo real
-    - Dashboard personalizable para usuarios
-    - Machine Learning para predicciones
-    - Alertas por email, SMS y Telegram
-    """,
-    version="1.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    contact={
-        "name": "Argfy Team",
-        "email": "contact@argfy.com",
-        "url": "https://argfy.com"
-    },
-    license_info={
-        "name": "MIT License",
-        "url": "https://opensource.org/licenses/MIT",
-    },
-    servers=[
-        {"url": "http://localhost:8000", "description": "Desarrollo Local"},
-        {"url": "https://argfy-backend.onrender.com", "description": "Producción"}
-    ],
-    tags_metadata=[
-        {
-            "name": "Economic Cards",
-            "description": "🎨 **Cards dinámicas** con sparklines y gráficos históricos elegantes"
-        },
-        {
-            "name": "BCRA Real Data", 
-            "description": "🏦 **Datos oficiales** del Banco Central en tiempo real"
-        },
-        {
-            "name": "Indicators",
-            "description": "📊 **Indicadores económicos** tradicionales y históricos"
-        },
-        {
-            "name": "Unified Economic Data",
-            "description": "🔄 **Servicio unificado** con múltiples fuentes de datos"
-        },
-        {
-            "name": "Scheduler",
-            "description": "⏰ **Sistema automático** de actualización de datos"
-        }
-    ]
+    title="Argfy Platform API",
+    description=(
+        "## 🇦🇷 API de Datos Económicos Argentinos\n\n"
+        "Plataforma consolidada para acceder a indicadores económicos "
+        "argentinos en tiempo real."
+    ),
+    version="1.0.0",
+    contact={"name": "Argfy Team", "email": "contact@argfy.com", "url": "https://argfy.com"},
+    license_info={"name": "MIT License", "url": "https://opensource.org/licenses/MIT"},
+    docs_url="/docs" if settings.is_development else None,
+    redoc_url="/redoc" if settings.is_development else None,
+    lifespan=lifespan,
 )
 
-# Agregar middleware de monitoreo
-app.add_middleware(RequestLoggingMiddleware)
-
-# CORS Configuration Mejorada
+# ------------------------- MIDDLEWARE ------------------------------------ #
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001", 
-        "https://argfy.vercel.app",
-        "https://*.vercel.app",
-        "https://argfy-platform.vercel.app",
-        "https://argfy-demo.vercel.app",
-        "*" if os.getenv("DEBUG") == "true" else "https://*.vercel.app"
-    ],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["*"],                     # ← “*” para todos
     allow_headers=["*"],
-    expose_headers=["X-Process-Time", "X-Request-ID"]
+    expose_headers=["X-Request-ID", "X-Response-Time"],
 )
 
-# ✅ INCLUIR TODOS LOS ROUTERS
-app.include_router(indicators.router, prefix="/api/v1")
-app.include_router(bcra_real.router)
-app.include_router(unified_economic.router)
-
-# ✅ INCLUIR ROUTER DE CARDS (CON MANEJO DE ERRORES)
-if CARDS_ROUTER_AVAILABLE:
-    app.include_router(economic_cards.router)
-    logger.info("✅ Economic Cards router incluido exitosamente")
-else:
-    logger.warning("⚠️ Economic Cards router no incluido - crear archivo primero")
-
-# ✅ ENDPOINT RAÍZ MEJORADO CON INFO DE CARDS
-@app.get("/", tags=["root"])
-async def root():
-    """Endpoint raíz de la API con información completa incluyendo Cards"""
-    scheduler_status = get_scheduler_status()
-    
-    return {
-        "message": "🚀 Argfy API v1.1.0 - Datos Económicos Argentinos con Cards Dinámicas",
-        "status": "operational",
-        "docs": "/docs",
-        "redoc": "/redoc",
-        "timestamp": datetime.utcnow().isoformat(),
-        "features": {
-            "bcra_integration": "ACTIVE",
-            "real_time_data": True,
-            "auto_scheduler": scheduler_status["running"],
-            "last_update": scheduler_status["last_update"],
-            "economic_cards": CARDS_ROUTER_AVAILABLE,
-            "hybrid_http_stack": True,
-            "historical_charts": True
-        },
-        "data_sources": [
-            "BCRA_OFICIAL", 
-            "INDEC", 
-            "BLUELYTICS", 
-            "DOLAR_API",
-            "BYMA",
-            "TIEMPO_REAL"
-        ],
-        "endpoints": {
-            # Endpoints tradicionales
-            "current_indicators": "/api/v1/indicators/current",
-            "historical_data": "/api/v1/indicators/historical/{indicator}",
-            "news": "/api/v1/indicators/news",
-            "dashboard_summary": "/api/v1/indicators/summary",
-            
-            # Endpoints BCRA
-            "bcra_dashboard": "/api/v1/bcra/dashboard",
-            "bcra_variables": "/api/v1/bcra/variables",
-            "bcra_cotizaciones": "/api/v1/bcra/cotizaciones",
-            "bcra_refresh": "/api/v1/bcra/refresh",
-            
-            # ✅ NUEVOS ENDPOINTS DE CARDS
-            "economic_cards": "/api/v1/cards/" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            "card_historical": "/api/v1/cards/{card_id}/historical" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            "card_summary": "/api/v1/cards/{card_id}/summary" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            "cards_categories": "/api/v1/cards/categories" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            "cards_refresh": "/api/v1/cards/refresh" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            "cards_health": "/api/v1/cards/health" if CARDS_ROUTER_AVAILABLE else "PENDING",
-            
-            # Endpoints de sistema
-            "system_health": "/health",
-            "api_status": "/api/status",
-            "scheduler_status": "/api/scheduler/status"
-        },
-        "ui_components": {
-            "cards_available": 8 if CARDS_ROUTER_AVAILABLE else 0,
-            "chart_types": ["line", "area", "bar"] if CARDS_ROUTER_AVAILABLE else [],
-            "categories": ["exchange", "monetary", "inflation", "market", "risk", "reserves"] if CARDS_ROUTER_AVAILABLE else [],
-            "sparklines": True if CARDS_ROUTER_AVAILABLE else False
-        }
-    }
-
-@app.get("/health", tags=["health"])
-async def health_check():
-    """Health check endpoint para monitoreo avanzado incluyendo Cards"""
-    from .monitoring import HealthChecker
-    
-    health_status = HealthChecker.get_health_status()
-    scheduler_status = get_scheduler_status()
-    
-    # ✅ HEALTH CHECK DE CARDS
-    cards_health = "unknown"
-    if CARDS_ROUTER_AVAILABLE:
-        try:
-            from .services.enhanced_economic_service import enhanced_economic_service
-            # Test rápido de cards
-            async with enhanced_economic_service:
-                test_cards = await enhanced_economic_service.get_economic_cards()
-                cards_health = "healthy" if len(test_cards) > 0 else "degraded"
-        except Exception as e:
-            cards_health = "unhealthy"
-            logger.error(f"Cards health check failed: {e}")
-    
-    return {
-        "status": health_status["status"],
-        "timestamp": datetime.utcnow().isoformat(),
-        "version": "1.1.0",
-        "environment": os.getenv("ENVIRONMENT", "development"),
-        "scheduler": {
-            "running": scheduler_status["running"],
-            "last_update": scheduler_status["last_update"],
-            "update_interval": f"{scheduler_status['update_interval_minutes']} minutes"
-        },
-        "services": {
-            "database": health_status["checks"]["database"]["status"],
-            "bcra_integration": "operational" if scheduler_status["running"] else "degraded",
-            "external_apis": health_status["checks"]["external_apis"]["status"],
-            "economic_cards": cards_health,
-            "hybrid_http_stack": "operational"
-        },
-        "checks": health_status["checks"],
-        "uptime": str(datetime.utcnow() - performance_monitor.start_time),
-        "cards_system": {
-            "available": CARDS_ROUTER_AVAILABLE,
-            "health": cards_health,
-            "estimated_cards": 8 if CARDS_ROUTER_AVAILABLE else 0
-        }
-    }
-
-@app.get("/api/status", tags=["status"])
-async def api_status():
-    """Status detallado de la API con métricas de Cards"""
-    metrics = performance_monitor.get_system_metrics()
-    scheduler_status = get_scheduler_status()
-    
-    return {
-        "api_version": "1.1.0",
-        "status": "operational",
-        "environment": os.getenv("ENVIRONMENT", "development"),
-        "timestamp": datetime.utcnow().isoformat(),
-        "services": {
-            "database": "operational",
-            "bcra_integration": "operational" if scheduler_status["running"] else "degraded",
-            "data_pipeline": "operational",
-            "auto_scheduler": "running" if scheduler_status["running"] else "stopped",
-            "economic_cards": "operational" if CARDS_ROUTER_AVAILABLE else "pending",
-            "hybrid_http": "operational"
-        },
-        "metrics": {
-            "total_requests": metrics["request_count"],
-            "error_count": metrics["error_count"],
-            "error_rate": f"{metrics['error_rate']:.2f}%",
-            "uptime": metrics["uptime"],
-            "cpu_percent": metrics["cpu_percent"],
-            "memory_percent": metrics["memory_percent"]
-        },
-        "data_freshness": {
-            "last_bcra_update": scheduler_status["last_update"],
-            "update_frequency": "15 minutes",
-            "data_sources_active": 6,
-            "cards_system": CARDS_ROUTER_AVAILABLE
-        },
-        "features": {
-            "economic_cards": CARDS_ROUTER_AVAILABLE,
-            "sparklines": CARDS_ROUTER_AVAILABLE,
-            "historical_charts": CARDS_ROUTER_AVAILABLE,
-            "real_time_updates": True,
-            "hybrid_http_stack": True
-        }
-    }
-
-# ✅ ENDPOINTS DE CONTROL MEJORADOS
-@app.post("/api/scheduler/start", tags=["scheduler"])
-async def start_data_scheduler():
-    """Iniciar el scheduler de datos con validación"""
-    success = start_scheduler()
-    return {
-        "success": success,
-        "message": "Scheduler iniciado exitosamente" if success else "Scheduler ya estaba ejecutándose",
-        "timestamp": datetime.utcnow().isoformat(),
-        "cards_system": CARDS_ROUTER_AVAILABLE
-    }
-
-@app.post("/api/scheduler/stop", tags=["scheduler"])
-async def stop_data_scheduler():
-    """Detener el scheduler de datos"""
-    from .services.bcra_scheduler import stop_scheduler
-    success = stop_scheduler()
-    return {
-        "success": success,
-        "message": "Scheduler detenido exitosamente" if success else "Scheduler ya estaba detenido",
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-@app.get("/api/scheduler/status", tags=["scheduler"])
-async def scheduler_status():
-    """Obtener estado del scheduler con info de Cards"""
-    status = get_scheduler_status()
-    return {
-        "scheduler": status,
-        "cards_integration": CARDS_ROUTER_AVAILABLE,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-@app.post("/api/scheduler/force-update", tags=["scheduler"])
-async def force_scheduler_update():
-    """Forzar actualización inmediata de datos"""
-    from .services.bcra_scheduler import force_update
-    success = force_update() if hasattr(bcra_scheduler, 'force_update') else False
-    return {
-        "success": success,
-        "message": "Actualización forzada iniciada" if success else "No se pudo forzar actualización",
-        "timestamp": datetime.utcnow().isoformat(),
-        "affects_cards": CARDS_ROUTER_AVAILABLE
-    }
-
-# ✅ ENDPOINT PARA INFO DE CAPACIDADES
-@app.get("/api/capabilities", tags=["system"])
-async def get_api_capabilities():
-    """Obtener capacidades completas de la API"""
-    from .services.http_factory import HTTPClientFactory
-    
-    http_capabilities = HTTPClientFactory.get_capabilities()
-    
-    return {
-        "version": "1.1.0",
-        "timestamp": datetime.utcnow().isoformat(),
-        "http_stack": {
-            "requests": http_capabilities.get("requests", False),
-            "httpx": http_capabilities.get("httpx", False), 
-            "aiohttp": http_capabilities.get("aiohttp", False),
-            "strategy": "hybrid_intelligent_selection"
-        },
-        "data_sources": {
-            "bcra_official": True,
-            "dolar_blue_multi": True,
-            "indec_inflation": True,
-            "market_data": True,
-            "risk_country": True
-        },
-        "features": {
-            "economic_cards": CARDS_ROUTER_AVAILABLE,
-            "sparklines": CARDS_ROUTER_AVAILABLE,
-            "historical_charts": CARDS_ROUTER_AVAILABLE,
-            "real_time_scheduler": True,
-            "auto_fallbacks": True,
-            "error_recovery": True
-        },
-        "endpoints_count": {
-            "traditional": 12,
-            "bcra_real": 6,
-            "cards": 6 if CARDS_ROUTER_AVAILABLE else 0,
-            "system": 8,
-            "total": 32 if CARDS_ROUTER_AVAILABLE else 26
-        }
-    }
-
-# Exception handlers mejorados
-@app.exception_handler(404)
-async def not_found_handler(request, exc):
-    return JSONResponse(
-        status_code=404,
-        content={
-            "error": "Endpoint not found",
-            "message": f"El endpoint '{request.url.path}' no existe",
-            "available_endpoints": [
-                "/docs - 📚 Documentación interactiva",
-                "/api/v1/indicators/current - 📊 Indicadores actuales",
-                "/api/v1/cards/ - 🎨 Cards económicas dinámicas" if CARDS_ROUTER_AVAILABLE else None,
-                "/api/v1/bcra/dashboard - 🏦 Dashboard BCRA",
-                "/api/capabilities - 🔧 Capacidades de la API",
-                "/health - 🏥 Health check completo"
-            ],
-            "cards_available": CARDS_ROUTER_AVAILABLE,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+if settings.is_production:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["argfy.com", "*.argfy.com", "api.argfy.com"],
     )
 
+app.add_middleware(RateLimitMiddleware)   # ← clase, no módulo
+app.add_middleware(LoggingMiddleware)     # ← clase, no módulo
+
+# --------------------------- ROUTERS ------------------------------------- #
+app.include_router(indicators.router, prefix="/api/v1", tags=["Indicadores"])
+app.include_router(health.router, prefix="/api/v1", tags=["Health"])
+app.include_router(system.router, prefix="/api/v1", tags=["Sistema"])
+
+# --------------------------- ENDPOINTS ----------------------------------- #
+@app.get("/", summary="Información de la API")
+async def root():
+    return {
+        "name": "Argfy Platform API",
+        "version": app.version,
+        "status": "operational",
+        "demo_mode": settings.DEMO_MODE,
+        "environment": settings.ENVIRONMENT,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
+@app.get("/ping", summary="Health Check simple")
+async def ping():
+    return {"message": "pong", "timestamp": datetime.utcnow().isoformat()}
+
+
+# ---------------------- ERROR HANDLERS ----------------------------------- #
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.status_code,
+                "message": exc.detail,
+                "timestamp": datetime.utcnow().isoformat(),
+                "path": request.url.path,
+            }
+        },
+    )
+
+
 @app.exception_handler(500)
-async def internal_error_handler(request, exc):
-    performance_monitor.log_error()
-    request_id = str(hash(str(request.url) + str(datetime.utcnow())))
-    
+async def internal_error(request: Request, exc: Exception):
+    logger.exception("Internal server error: %s", exc)
     return JSONResponse(
         status_code=500,
         content={
-            "error": "Internal server error",
-            "message": "Error interno del servidor",
-            "request_id": request_id,
-            "timestamp": datetime.utcnow().isoformat(),
-            "support": "Include request_id when reporting this error"
-        }
+            "error": {
+                "code": 500,
+                "message": "Internal server error",
+                "timestamp": datetime.utcnow().isoformat(),
+                "path": request.url.path,
+            }
+        },
     )
 
-# ✅ EVENTOS DE INICIO Y PARADA MEJORADOS
-@app.on_event("startup")
-async def startup_event():
-    """Eventos de inicio de la aplicación con inicialización de Cards"""
-    logger.info("🚀 Iniciando Argfy Platform API v1.1.0 con Cards Dinámicas")
-    
-    # Verificar sistema de cards
-    if CARDS_ROUTER_AVAILABLE:
-        logger.info("✅ Sistema de Cards Económicas disponible")
-        try:
-            from .services.enhanced_economic_service import enhanced_economic_service
-            # Test inicial de cards
-            async with enhanced_economic_service:
-                test_cards = await enhanced_economic_service.get_economic_cards()
-                logger.info(f"🎨 Cards económicas inicializadas: {len(test_cards)} disponibles")
-        except Exception as e:
-            logger.error(f"⚠️ Error inicializando cards: {e}")
-    else:
-        logger.warning("⚠️ Sistema de Cards no disponible - requiere implementación")
-    
-    # Inicializar scheduler automáticamente
-    if os.getenv("ENABLE_BCRA_SCHEDULER", "true").lower() == "true":
-        logger.info("📅 Iniciando scheduler automático de datos BCRA...")
-        success = start_scheduler()
-        if success:
-            logger.info("✅ Scheduler iniciado exitosamente")
-        else:
-            logger.warning("⚠️ Scheduler ya estaba ejecutándose")
-    
-    # Keep-alive para Render en producción
-    if os.getenv("ENVIRONMENT") == "production":
-        try:
-            from .keep_alive import ping_self
-            asyncio.create_task(ping_self())
-            logger.info("💓 Keep-alive activado para producción")
-        except ImportError:
-            logger.warning("⚠️ Keep-alive no disponible")
-    
-    logger.info("🎯 Argfy Platform lista para recibir requests")
-    logger.info(f"📊 Cards System: {'ACTIVE' if CARDS_ROUTER_AVAILABLE else 'PENDING'}")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Eventos de parada de la aplicación"""
-    logger.info("⏹️ Deteniendo Argfy Platform...")
-    
-    # Detener scheduler
-    from .services.bcra_scheduler import stop_scheduler
-    stop_scheduler()
-    
-    logger.info("✅ Argfy Platform detenida correctamente")
+# ---------------------- CUSTOM OPENAPI ----------------------------------- #
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
 
-# Configuración para desarrollo
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    schema["info"]["x-logo"] = {"url": "https://argfy.com/logo.png"}
+    schema["servers"] = [
+        {"url": "https://api.argfy.com", "description": "Prod"},
+        {"url": "http://localhost:8000", "description": "Dev"},
+    ]
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = custom_openapi
+
+# ------------------- DEMO DATA INIT -------------------------------------- #
+async def initialize_demo_data():
+    try:
+        from .models import EconomicIndicator
+
+        db = next(get_db())
+        if db.query(EconomicIndicator).count() == 0:
+            logger.info("📊 Initializing demo data...")
+            db.add_all(
+                [
+                    EconomicIndicator(
+                        indicator_type="usd_minorista",
+                        value=1195.0,
+                        source="DEMO",
+                        unit="ARS",
+                        label="USD Minorista",
+                    ),
+                    # … otros demo
+                ]
+            )
+            db.commit()
+            logger.info("✅ Demo data ready")
+        db.close()
+    except Exception as exc:
+        logger.exception("❌ Failed to init demo data: %s", exc)
+
+
+# -------------------- CLI ------------------------------------------------ #
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
-        "app.main:app", 
-        host="0.0.0.0", 
-        port=8000, 
-        reload=True,
-        log_level="info",
-        access_log=True
+        "app.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.RELOAD and settings.is_development,
+        log_level=settings.LOG_LEVEL.lower(),
     )
