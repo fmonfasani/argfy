@@ -1,15 +1,89 @@
-# Requirements consolidados y limpios
-fastapi[all]==0.104.1
-uvicorn[standard]==0.24.0
-sqlalchemy==2.0.23
-aiohttp==3.9.1
-requests==2.31.0
-pandas==2.1.3
-pydantic==2.5.0
-python-multipart==0.0.6
-python-dotenv==1.0.0
-psutil==5.9.6
-redis==5.0.1
-schedule==1.2.0
-pytest==7.4.3
-httpx==0.25.2
+# ==============================================
+# ARGFY PLATFORM - ENTERPRISE REQUIREMENTS
+# ==============================================
+# Cada dependencia está elegida para el largo plazo
+# Versiones LTS y estables para máxima confiabilidad
+
+# ==============================================
+# CORE FASTAPI STACK (Production-Ready)
+# ==============================================
+fastapi==0.104.1                 # API framework principal - LTS version
+uvicorn[standard]==0.24.0         # ASGI server con todas las extensiones
+starlette==0.27.0                 # Núcleo web framework
+pydantic==2.5.1                   # Validación de datos y serialización
+pydantic-settings==2.1.0          # Gestión de configuración enterprise
+
+# ==============================================
+# DATABASE STACK (PostgreSQL + ORM)
+# ==============================================
+sqlalchemy==2.0.23               # ORM principal - versión 2.x moderna
+psycopg2-binary==2.9.9            # PostgreSQL adapter (producción)
+asyncpg==0.29.0                   # PostgreSQL async driver para performance
+alembic==1.12.1                   # Database migrations management
+
+# ==============================================
+# HTTP & NETWORKING (Arquitectura Híbrida)
+# ==============================================
+requests==2.31.0                 # HTTP sync client - rock solid
+httpx==0.25.2                     # HTTP async client - requests compatible
+aiohttp==3.9.1                    # Full async HTTP framework
+websockets==12.0                  # WebSocket support para real-time
+
+# ==============================================
+# DATA PROCESSING (Versiones Estables)
+# ==============================================
+pandas==2.0.3                     # Data analysis - versión estable con Python 3.11
+numpy==1.24.4                     # Numerical computing - compatible con pandas 2.0.3
+python-dateutil==2.8.2            # Date/time utilities
+pytz==2023.3                      # Timezone handling
+
+# ==============================================
+# MONITORING & OBSERVABILITY (Enterprise)
+# ==============================================
+prometheus-client==0.19.0         # Metrics collection para Grafana
+sentry-sdk[fastapi]==1.38.0       # Error tracking y performance monitoring
+structlog==23.2.0                 # Structured logging para análisis
+psutil==5.9.6                     # System monitoring
+
+# ==============================================
+# SECURITY & AUTHENTICATION (Production)
+# ==============================================
+python-jose[cryptography]==3.3.0  # JWT token handling
+passlib[bcrypt]==1.7.4            # Password hashing
+python-multipart==0.0.6           # File uploads support
+
+# ==============================================
+# UTILITIES & HELPERS (Development Experience)
+# ==============================================
+python-dotenv==1.0.0              # Environment variables management
+click==8.1.7                      # CLI framework para scripts
+rich==13.7.0                      # Beautiful terminal output
+typer==0.9.0                      # CLI creation framework
+
+# ==============================================
+# DEVELOPMENT & TESTING (Quality Assurance)
+# ==============================================
+pytest==7.4.3                     # Testing framework
+pytest-asyncio==0.21.1            # Async testing support
+pytest-cov==4.1.0                 # Coverage reporting
+black==23.11.0                    # Code formatting
+ruff==0.1.6                       # Fast linting (Rust-based)
+mypy==1.7.1                       # Type checking
+
+# ==============================================
+# OPTIONAL: REDIS & CACHING (Para Fase 2)
+# ==============================================
+# redis==5.0.1                    # Redis client para caching
+# hiredis==2.2.3                  # Redis performance boost
+
+# ==============================================
+# OPTIONAL: MESSAGE QUEUES (Para Fase 3)
+# ==============================================
+# aiokafka==0.8.11                # Kafka async client
+# celery==5.3.4                   # Background task processing
+
+# ==============================================
+# PRODUCTION DEPLOYMENT
+# ==============================================
+gunicorn==21.2.0                  # WSGI server para deployment
+uvloop==0.19.0                    # High performance event loop

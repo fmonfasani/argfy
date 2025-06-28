@@ -1,4 +1,5 @@
 __pycache__/
+__init__.py/
 *.py[cod]
 backend/data/
 /node_modules/
@@ -6,3 +7,9 @@ backend/data/
 .backend/venv
 # Pytest cache
 .cache
+/backend_OLD_20250628_124113
+/backend/production_ready_setup.sh
+backend/app/config/__init__.py
+/*.sh
+*.json
+/*.json
