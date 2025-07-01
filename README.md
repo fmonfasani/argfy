@@ -1,6 +1,6 @@
 # argfy# 🚀 Argfy Platform - Demo v0.1
 
-Plataforma de datos económicos argentinos en tiempo real. Demo funcional desarrollado en 30 días.
+Plataforma de datos económicos argentinos en tiempo real. Proximamente!
 
 ## 📋 Descripción
 
