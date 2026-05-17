@@ -40,6 +40,17 @@ services:
         condition: service_healthy
     expose:
       - "8000"
+    networks:
+      - default
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.argfy-backend.rule=Host(`api.argfy.com`)
+      - traefik.http.routers.argfy-backend.entrypoints=https
+      - traefik.http.routers.argfy-backend.tls=true
+      - traefik.http.routers.argfy-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.argfy-backend.loadbalancer.server.port=8000
 
   frontend:
     build:
@@ -54,7 +65,23 @@ services:
       - backend
     expose:
       - "3000"
+    networks:
+      - default
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.argfy-frontend.rule=Host(`argfy.com`) || Host(`www.argfy.com`)
+      - traefik.http.routers.argfy-frontend.entrypoints=https
+      - traefik.http.routers.argfy-frontend.tls=true
+      - traefik.http.routers.argfy-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.argfy-frontend.loadbalancer.server.port=3000
 
 volumes:
   argfy_pgdata:
     name: argfy_pgdata
+
+networks:
+  default:
+  coolify:
+    external: true
