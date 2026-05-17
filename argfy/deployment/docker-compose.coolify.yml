@@ -9,12 +9,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - argfy_pgdata:/var/lib/postgresql/data
-      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ../backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      default:
+        aliases:
+          - argfy-postgres
 
   backend:
     container_name: argfy-api
@@ -23,7 +27,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@argfy-postgres:5432/${POSTGRES_DB}
       ENVIRONMENT: production
       DEBUG: "false"
       SECRET_KEY: ${SECRET_KEY}
