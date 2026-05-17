@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import yaml; yaml.safe_load\\(open\\(r'd:/Software Development/Porfolio/valuarty/.github/workflows/deploy.yml'\\)\\); print\\('deploy.yml: OK'\\)\")",
+      "Bash(python -c \"import yaml; yaml.safe_load\\(open\\(r'd:/Software Development/Porfolio/valuarty/.github/workflows/test.yml'\\)\\); print\\('test.yml: OK'\\)\")"
+    ]
+  }
+}

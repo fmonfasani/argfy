@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - argfy_pgdata:/var/lib/postgresql/data
+      - ../backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      ENVIRONMENT: production
+      DEBUG: "false"
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: '["https://argfy.com","https://www.argfy.com"]'
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN}
+      WEB_CONCURRENCY: "1"
+      ENABLE_SCHEDULER: "true"
+      TZ: UTC
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "coolify.managed=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.argfy-backend.rule=Host(`api.argfy.com`)"
+      - "traefik.http.routers.argfy-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.argfy-backend.loadbalancer.server.port=8000"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE: https://api.argfy.com/api/v1
+      NEXT_PUBLIC_BACKEND_URL: https://api.argfy.com
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    depends_on:
+      - backend
+    labels:
+      - "coolify.managed=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.argfy-frontend.rule=Host(`argfy.com`) || Host(`www.argfy.com`)"
+      - "traefik.http.routers.argfy-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.argfy-frontend.loadbalancer.server.port=3000"
+
+volumes:
+  argfy_pgdata:
+    name: argfy_pgdata

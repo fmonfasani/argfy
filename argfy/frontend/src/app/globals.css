@@ -1,0 +1,282 @@
+/* frontend/src/app/globals.css - VERSIÓN FINAL */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ───── Theme CSS Variables ───── */
+:root {
+  --bg-body: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-header: #1e293b;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+}
+
+.dark {
+  --bg-body: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-elevated: #0f172a;
+  --bg-header: #0f172a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --border-strong: #475569;
+}
+
+/* ------------  RESET & UTILIDADES  ----------------- */
+* {
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { 
+  scroll-behavior: smooth; 
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* ───── Theme utility classes ───── */
+.bg-body { background-color: var(--bg-body); }
+.bg-surface { background-color: var(--bg-surface); }
+.bg-elevated { background-color: var(--bg-elevated); }
+.bg-header { background-color: var(--bg-header); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border); }
+.border-theme-strong { border-color: var(--border-strong); }
+
+/* FORZAR ANCHO COMPLETO EN MARQUESINAS */
+.marquee-container,
+.tradingview-widget-container,
+.tradingview-widget-container__widget {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ------------  MARQUESINAS PROFESIONALES  ----------------- */
+
+/* 1️⃣ Contenedor principal con altura fija */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  height: 50px; /* ALTURA FINAL: 50px */
+  width: 100%; /* Ocupa todo el ancho */
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+/* 2️⃣ Efectos de gradiente en los bordes */
+.marquee-container::before,
+.marquee-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marquee-container::before { left: 0; }
+.marquee-container::after { right: 0; }
+
+/* 3️⃣ Colores de fondo - Celeste y Blanco */
+.marquee-celeste {
+  background-color: #edfcff; /* Celeste pastel suave */
+}
+.marquee-celeste::before {
+  background: linear-gradient(to right, rgb(236, 253, 255), rgba(224, 247, 250, 0));
+}
+.marquee-celeste::after {
+  background: linear-gradient(to left, rgba(224, 247, 250, 1), rgba(224, 247, 250, 0));
+}
+
+.marquee-blanco {
+  background-color: #fffff5; /* Blanco puro */
+}
+.marquee-blanco::before {
+  background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+.marquee-blanco::after {
+  background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}
+
+/* 4️⃣ Track de la marquesina */
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+  height: 100%;
+  width: 100%; /* Asegurar ancho completo */
+ 
+}
+
+/* 5️⃣ Animaciones con velocidades diferenciadas */
+@keyframes marquee-left {
+  0% { transform: translateX(25%); }
+  25% { transform: translateX(-100%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.marquee-left-fast { 
+  animation: marquee-left 35s linear infinite; 
+}
+
+.marquee-right-normal { 
+  animation: marquee-right 90s linear infinite; 
+}
+
+.marquee-left-slow { 
+  animation: marquee-left 55s linear infinite; 
+}
+
+/* 6️⃣ Items de datos */
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.2rem;
+  margin: 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  height: 35px; /* Altura de items ajustada para 50px container */
+}
+
+/* 7️⃣ Separadores */
+.marquee-separator {
+  width: 1px;
+  height: 20px;
+  background-color: rgba(0,0,0,0.08);
+  margin: 0 1rem;
+  flex-shrink: 0;
+}
+
+/* 8️⃣ Texto y etiquetas */
+.marquee-label {
+  color: #6B7280;
+  margin-right: 0.5rem;
+  font-weight: 400;
+}
+
+.marquee-value {
+  color: #111827;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+/* 9️⃣ Cambios de precio - Solo texto coloreado */
+.marquee-change {
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* Sin padding ni background - solo texto limpio */
+}
+
+.marquee-change.positive {
+  color: #16a34a; /* Verde vibrante */
+}
+
+.marquee-change.negative {
+  color: #dc2626; /* Rojo vibrante */
+}
+
+/* 🔟 Efectos hover suaves */
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-container:hover {
+  filter: brightness(0.98);
+}
+
+.marquee-celeste:hover {
+  background-color: #c6f9ff; /* Celeste ligeramente más oscuro */
+}
+
+.marquee-blanco:hover {
+  background-color: #f5f9fd; /* Gris muy suave */
+}
+
+/* 1️⃣1️⃣ Responsive */
+@media (max-width: 768px) {
+  .marquee-container {
+    height: 45px; /* Más compacto en móvil */
+  }
+  
+  .marquee-item {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+    height: 32px;
+  }
+  
+  .marquee-separator {
+    margin: 0 0.75rem;
+    height: 16px;
+  }
+  
+  .marquee-left-fast { animation-duration: 20s; }
+  .marquee-right-normal { animation-duration: 32s; }
+  .marquee-left-slow { animation-duration: 45s; }
+}
+
+/* 1️⃣2️⃣ Ocultar elementos de TradingView */
+.tradingview-widget-container .tradingview-widget-copyright {
+  display: none !important;
+}
+
+.tradingview-widget-container .tv-embed-widget-wrapper__header {
+  display: none !important;
+}
+
+.tradingview-widget-container [class*="copyright"] {
+  display: none !important;
+}
+
+.tradingview-widget-container [class*="powered"] {
+  display: none !important;
+}
+
+/* 1️⃣3️⃣ Entrada suave */
+.marquee-container {
+  opacity: 0;
+  animation: fadeInMarquee 0.8s ease-out forwards;
+}
+
+.marquee-container:nth-child(1) { animation-delay: 0.1s; }
+.marquee-container:nth-child(2) { animation-delay: 0.2s; }
+.marquee-container:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInMarquee {
+  from { 
+    opacity: 0; 
+    transform: translateY(-3px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}

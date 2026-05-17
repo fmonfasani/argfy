@@ -1,0 +1,52 @@
+name: Deploy to Hetzner via Coolify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Tests must pass
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: Trigger Coolify deploy
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate secrets present
+        run: |
+          if [ -z "${{ secrets.COOLIFY_WEBHOOK_URL }}" ]; then
+            echo "::error::COOLIFY_WEBHOOK_URL secret is missing"
+            exit 1
+          fi
+          if [ -z "${{ secrets.COOLIFY_WEBHOOK_TOKEN }}" ]; then
+            echo "::error::COOLIFY_WEBHOOK_TOKEN secret is missing"
+            exit 1
+          fi
+
+      - name: Trigger Coolify webhook
+        run: |
+          set -euo pipefail
+          response=$(curl -sS -o /tmp/body -w "%{http_code}" \
+                          -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+                          -H "Authorization: Bearer ${{ secrets.COOLIFY_WEBHOOK_TOKEN }}")
+          echo "Coolify responded: HTTP $response"
+          cat /tmp/body
+          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
+            echo "::error::Coolify webhook returned non-2xx"
+            exit 1
+          fi
+
+      - name: Summary
+        run: |
+          echo "### Deploy triggered" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Author: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Coolify will pull and rebuild containers." >> $GITHUB_STEP_SUMMARY
+          echo "- Verify: https://api.argfy.com/health" >> $GITHUB_STEP_SUMMARY
