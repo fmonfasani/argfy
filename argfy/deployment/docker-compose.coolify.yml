@@ -38,12 +38,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    labels:
-      - "coolify.managed=true"
-      - "traefik.enable=true"
-      - "traefik.http.routers.argfy-backend.rule=Host(`api.argfy.com`)"
-      - "traefik.http.routers.argfy-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.argfy-backend.loadbalancer.server.port=8000"
+    expose:
+      - "8000"
 
   frontend:
     build:
@@ -56,12 +52,8 @@ services:
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     depends_on:
       - backend
-    labels:
-      - "coolify.managed=true"
-      - "traefik.enable=true"
-      - "traefik.http.routers.argfy-frontend.rule=Host(`argfy.com`) || Host(`www.argfy.com`)"
-      - "traefik.http.routers.argfy-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.argfy-frontend.loadbalancer.server.port=3000"
+    expose:
+      - "3000"
 
 volumes:
   argfy_pgdata:
