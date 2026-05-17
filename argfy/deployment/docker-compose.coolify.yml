@@ -1,5 +1,6 @@
 services:
   postgres:
+    container_name: argfy-db
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -16,6 +17,7 @@ services:
       retries: 5
 
   backend:
+    container_name: argfy-api
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -35,24 +37,33 @@ services:
       WEB_CONCURRENCY: "1"
       ENABLE_SCHEDULER: "true"
       TZ: UTC
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
     expose:
       - "8000"
+    ports:
+      - "127.0.0.1:8200:8000"
     networks:
       - default
       - coolify
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      - traefik.http.routers.argfy-backend.rule=Host(`api.argfy.com`)
-      - traefik.http.routers.argfy-backend.entrypoints=https
-      - traefik.http.routers.argfy-backend.tls=true
-      - traefik.http.routers.argfy-backend.tls.certresolver=letsencrypt
-      - traefik.http.services.argfy-backend.loadbalancer.server.port=8000
+      - traefik.http.routers.argfy-api.rule=Host(`api.argfy.com`)
+      - traefik.http.routers.argfy-api.entrypoints=https
+      - traefik.http.routers.argfy-api.tls=true
+      - traefik.http.routers.argfy-api.tls.certresolver=letsencrypt
+      - traefik.http.services.argfy-api.loadbalancer.server.port=8000
 
   frontend:
+    container_name: argfy-web
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -61,21 +72,29 @@ services:
       NEXT_PUBLIC_API_BASE: https://api.argfy.com/api/v1
       NEXT_PUBLIC_BACKEND_URL: https://api.argfy.com
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     depends_on:
       - backend
     expose:
       - "3000"
+    ports:
+      - "127.0.0.1:3200:3000"
     networks:
       - default
       - coolify
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      - traefik.http.routers.argfy-frontend.rule=Host(`argfy.com`) || Host(`www.argfy.com`)
-      - traefik.http.routers.argfy-frontend.entrypoints=https
-      - traefik.http.routers.argfy-frontend.tls=true
-      - traefik.http.routers.argfy-frontend.tls.certresolver=letsencrypt
-      - traefik.http.services.argfy-frontend.loadbalancer.server.port=3000
+      - traefik.http.routers.argfy-web.rule=Host(`argfy.com`) || Host(`www.argfy.com`)
+      - traefik.http.routers.argfy-web.entrypoints=https
+      - traefik.http.routers.argfy-web.tls=true
+      - traefik.http.routers.argfy-web.tls.certresolver=letsencrypt
+      - traefik.http.services.argfy-web.loadbalancer.server.port=3000
 
 volumes:
   argfy_pgdata:
