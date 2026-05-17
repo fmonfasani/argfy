@@ -11,8 +11,9 @@ backend/data/
 /backend/production_ready_setup.sh
 backend/app/config/__init__.py
 /*.sh
-*.json
-/*.json
+# NO usar `*.json` blanket — rompe package.json, tsconfig.json, .eslintrc.json,
+# .prettierrc.json, components.json (shadcn), etc. Excluir solo los dumps de datos
+# locales por nombre explícito si fuera necesario.
 
 # Production secrets — NUNCA commitear
 deployment/coolify/secrets.env
