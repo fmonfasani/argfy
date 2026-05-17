@@ -11,6 +11,7 @@ import logging
 from ..database import get_db
 from ..models import HealthCheck
 from ..services.scheduler import scheduler
+from ..config.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -22,7 +23,7 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
-        "environment": "development"
+        "environment": settings.ENVIRONMENT,
     }
 
 @router.get("/health/detailed")
