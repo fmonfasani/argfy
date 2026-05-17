@@ -1,5 +1,4 @@
 __pycache__/
-__init__.py/
 *.py[cod]
 backend/data/
 /node_modules/
@@ -9,7 +8,6 @@ backend/data/
 .cache
 /backend_OLD_20250628_124113
 /backend/production_ready_setup.sh
-backend/app/config/__init__.py
 /*.sh
 # NO usar `*.json` blanket — rompe package.json, tsconfig.json, .eslintrc.json,
 # .prettierrc.json, components.json (shadcn), etc. Excluir solo los dumps de datos
