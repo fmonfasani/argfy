@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+import asyncio
 import logging
 import sys
 from datetime import datetime
@@ -165,6 +166,13 @@ async def lifespan(app: FastAPI):
                 logger.info("🔄 APScheduler iniciado")
             except Exception as e:
                 logger.warning(f"⚠️ Error iniciando APScheduler: {e}")
+
+            try:
+                from .services.scheduler import start_scheduler as start_unified_scheduler
+                asyncio.create_task(start_unified_scheduler())
+                logger.info("🔄 UnifiedScheduler iniciado")
+            except Exception as e:
+                logger.warning(f"⚠️ Error iniciando UnifiedScheduler: {e}")
 
         logger.info(f"📊 Routers cargados: {len(routers_loaded)}")
         logger.info(f"❌ Routers fallidos: {len(routers_failed)}")
