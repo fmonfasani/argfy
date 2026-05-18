@@ -1,13 +1,12 @@
 // frontend/src/hooks/useIndicators.ts
 
-import { api } from '@/lib/api'
-import type { EconomicIndicator, LoadingState } from '@/types'
 import { useState, useEffect, useCallback } from 'react'
-import { Indicator, DashboardData, APIResponse } from '../types'
-import { apiClient } from '../lib/api'
+import { Indicator, DashboardData } from '../types'
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000/api/v1'
 
 
-export default function useIndicators() {
+function useIndicators() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -17,14 +16,24 @@ export default function useIndicators() {
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await apiClient.get<APIResponse<DashboardData>>('/dashboard/complete')
-      
-      if (response.data.status === 'success') {
-        setData(response.data.data!)
+
+      const res = await fetch(`${API_BASE}/dashboard/complete`, {
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(10000),
+      })
+
+      if (!res.ok) {
+        setError(`Error ${res.status}`)
+        return
+      }
+
+      const json = await res.json()
+
+      if (json.status === 'success' && json.data) {
+        setData(json.data)
         setLastUpdated(new Date())
       } else {
-        setError(response.data.message || 'Error fetching data')
+        setError(json.message || 'Error fetching data')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -84,3 +93,6 @@ export default function useIndicators() {
     isDataFresh: lastUpdated && (Date.now() - lastUpdated.getTime()) < 300000 // 5 min
   }
 }
+
+export { useIndicators }
+export default useIndicators

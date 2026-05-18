@@ -1,6 +1,7 @@
 // frontend/src/hooks/useBCRAReal.ts
 import { useState, useEffect } from 'react'
-import { API_BASE_URL } from '@/lib/config'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000/api/v1'
 
 interface BCRAData {
   indicadores_principales: Record<string, any>

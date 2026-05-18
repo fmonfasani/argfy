@@ -8,7 +8,7 @@ interface LoadingSpinnerProps {
   className?: string
 }
 
-export function LoadingSpinner({ 
+function LoadingSpinner({ 
   size = 'medium', 
   color = 'text-blue-600',
   className = '' 
@@ -23,3 +23,6 @@ export function LoadingSpinner({
     <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-current ${sizeClasses[size]} ${color} ${className}`} />
   )
 }
+
+export { LoadingSpinner }
+export default LoadingSpinner

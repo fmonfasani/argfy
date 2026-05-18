@@ -2,14 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import EconomicDataCards from '@/components/EconomicDataCards'
-import DailyEconomicData from '@/components/DailyEconomicData'
-import NewsSection from '@/components/NewsSection'
-import EconomicsSection from '@/components/EconomicsSection'
-import BanksSection from '@/components/BanksSection'
-import GovernmentSection from '@/components/GovernmentSection'
-import BCRASection from '@/components/BCRASection'
-import FinancesSection from '@/components/FinancesSection'
-import MarketsSection from '@/components/MarketsSection'
+
 import Footer from '@/components/Footer'
 import DashboardModal from '@/components/DashboardModal'
 import CedearsLeaderboard from '@/components/CedearsLeaderboard'
@@ -103,15 +96,6 @@ export default function HomePage() {
       <CedearsLeaderboard />
 
 
-      {/* Resto del contenido */}
-      <BanksSection />
-      <GovernmentSection />
-      <BCRASection />
-      <EconomicsSection />
-      <FinancesSection />
-      <MarketsSection />
-      <DailyEconomicData />
-      <NewsSection />
       <Footer />
 
       <DashboardModal 

@@ -1,0 +1,97 @@
+services:
+  db:
+    container_name: "{proyecto}-db"
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - "{proyecto}_pgdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+
+  api:
+    container_name: "{proyecto}-api"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ENVIRONMENT: production
+      DEBUG: "false"
+      SECRET_KEY: ${SECRET_KEY}
+      CORS_ORIGINS: '["https://{dominio}"]'
+      SENTRY_DSN: ${SENTRY_DSN}
+      LOG_LEVEL: info
+      WEB_CONCURRENCY: "1"
+      TZ: UTC
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    networks:
+      - default
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.{proyecto}-api.rule=Host(`api.{dominio}`)
+      - traefik.http.routers.{proyecto}-api.entrypoints=https
+      - traefik.http.routers.{proyecto}-api.tls=true
+      - traefik.http.routers.{proyecto}-api.tls.certresolver=letsencrypt
+      - traefik.http.services.{proyecto}-api.loadbalancer.server.port=8000
+
+  web:
+    container_name: "{proyecto}-web"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE: https://api.{dominio}/api/v1
+      NEXT_PUBLIC_BACKEND_URL: https://api.{dominio}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      - api
+    expose:
+      - "3000"
+    networks:
+      - default
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.{proyecto}-web.rule=Host(`{dominio}`) || Host(`www.{dominio}`)
+      - traefik.http.routers.{proyecto}-web.entrypoints=https
+      - traefik.http.routers.{proyecto}-web.tls=true
+      - traefik.http.routers.{proyecto}-web.tls.certresolver=letsencrypt
+      - traefik.http.services.{proyecto}-web.loadbalancer.server.port=3000
+
+volumes:
+  "{proyecto}_pgdata":
+    name: "{proyecto}_pgdata"
+
+networks:
+  default:
+  coolify:
+    external: true

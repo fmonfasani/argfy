@@ -9,7 +9,7 @@ interface RelatedIndicatorsProps {
   currentIndicator: string
 }
 
-function RelatedIndicators({ category, currentIndicator }: RelatedIndicatorsProps) {
+export function RelatedIndicators({ category, currentIndicator }: RelatedIndicatorsProps) {
   const [relatedIndicators, setRelatedIndicators] = useState<Indicator[]>([])
   const [loading, setLoading] = useState(true)
 

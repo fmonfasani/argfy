@@ -2,6 +2,7 @@
 'use client'
 import React from 'react'
 import { ChartConfig, Indicator } from '@/types'
+import { getFrequencyLabel } from '@/utils/formatters'
 
 interface ChartControlsProps {
   config: ChartConfig

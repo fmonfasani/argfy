@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import InternationalMarquee from '@/components/InternationalMarquee'
-import ArgentineEconomicMarquee from '@/components/ArgentineEconomicMarquee'
-import ArgentineStocksMarquee from '@/components/ArgentineStocksMarquee'
+import '@/styles/tokens.css'
+import MarqueeBar from '@/components/MarqueeBar'
 import Header from '@/components/Header'
-import SecondaryNav from '@/components/SecondaryNav'
 import Providers from '@/components/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -33,23 +31,11 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-screen`}>
 
 
-        {/* Header Principal */}
         <Header />
-        {/* MARQUESINAS FINALES - ALTURA 50px */}
+        <MarqueeBar variant="international" />
+        <MarqueeBar variant="economic" />
+        <MarqueeBar variant="stocks" />
         
-        {/* 1. Internacional (Celeste, Rápida, ➡️) */}
-        <InternationalMarquee />     
-               
-        {/* 2. Económica Argentina (Blanco, Media, ⬅️) */}
-        <ArgentineEconomicMarquee />
-        
-        {/* 3. Acciones Argentinas (Celeste, Lenta, ➡️) */}
-        <ArgentineStocksMarquee />
-        
-
-        
-        {/* Navegación Secundaria */}
-        <SecondaryNav />
         
         {/* Contenido Principal */}
         <main className="relative">

@@ -4,7 +4,7 @@
 import React from 'react'
 import { IndicatorCard } from './IndicatorCard'
 import { Category, Indicator } from '@/types'
-import { COLOR_SCHEMES } from '@/config/categories'
+import { CATEGORIES, COLOR_SCHEMES } from '@/config/categories'
 
 interface CategorySectionProps {
   category: Category

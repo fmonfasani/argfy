@@ -1,6 +1,7 @@
 """
-Dependency function: 403 if tenant lacks a feature.
-Uso: @router.get(..., dependencies=[Depends(require_feature("historical_prices"))])
+Dependency factory: 403 if tenant lacks a feature.
+Uso en router endpoints:
+  @router.get(..., dependencies=[Depends(require_feature("historical_prices"))])
 """
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -16,6 +17,8 @@ def require_feature(feature_key: str):
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
     ):
+        if current_user is None:
+            raise HTTPException(status_code=401, detail="Authentication required")
         if not has_feature(db, current_user.tenant_id, feature_key):
             raise HTTPException(
                 status_code=403,

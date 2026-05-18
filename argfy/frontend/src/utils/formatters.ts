@@ -66,6 +66,18 @@ export const getSourceBadgeColor = (source: string): string => {
   return colors[source] || colors['DEMO']
 }
 
+export function getFrequencyLabel(frequency: string): string {
+  const labels: Record<string, string> = {
+    'real_time': 'Tiempo real',
+    'daily': 'Diario',
+    'weekly': 'Semanal',
+    'monthly': 'Mensual',
+    'quarterly': 'Trimestral',
+    'yearly': 'Anual'
+  }
+  return labels[frequency] || frequency
+}
+
 export const getFreshnessStatus = (lastUpdated: Date): {
   status: 'fresh' | 'recent' | 'stale'
   color: string

@@ -15,7 +15,7 @@ export function useHistoricalData(indicatorType: string, days: number = 30) {
     
     try {
       setLoading({ isLoading: true, error: null })
-      const response = await api.getHistoricalData(indicatorType, days)
+      const response = await api.getHistorical(indicatorType, days)
       setData(response.data)
     } catch (error) {
       setLoading({ 

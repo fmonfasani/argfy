@@ -1,3 +1,12 @@
+export interface Category {
+  id: string
+  title: string
+  description: string
+  icon: string
+  indicators: string[]
+  color: string
+}
+
 export const CATEGORIES: Record<string, Category> = {
   economia: {
     id: 'economia',
@@ -8,7 +17,7 @@ export const CATEGORIES: Record<string, Category> = {
     color: 'blue'
   },
   gobierno: {
-    id: 'gobierno', 
+    id: 'gobierno',
     title: '🏛️ Datos de Gobierno',
     description: 'Resultado fiscal, deuda pública, gasto gubernamental.',
     icon: '🏛️',
@@ -17,7 +26,7 @@ export const CATEGORIES: Record<string, Category> = {
   },
   finanzas: {
     id: 'finanzas',
-    title: '🏦 Datos Financieros y Bancos', 
+    title: '🏦 Datos Financieros y Bancos',
     description: 'Plazos fijos, tasas de crédito, depósitos, liquidez bancaria.',
     icon: '🏦',
     indicators: ['plazo_fijo_30', 'tasa_tarjeta_credito', 'depositos_privados', 'prestamos_sector_privado', 'morosidad_bancaria', 'liquidez_bancaria'],
@@ -27,7 +36,7 @@ export const CATEGORIES: Record<string, Category> = {
     id: 'mercados',
     title: '📈 Datos de Mercados',
     description: 'MERVAL, bonos, acciones, CEDEARs, panel BYMA.',
-    icon: '📈', 
+    icon: '📈',
     indicators: ['merval', 'rendimiento_al30', 'precio_gd30', 'volumen_acciones_cedears', 'dolar_ccl', 'panel_general_byma'],
     color: 'indigo'
   },
@@ -40,7 +49,7 @@ export const CATEGORIES: Record<string, Category> = {
     color: 'cyan'
   },
   industria: {
-    id: 'industria', 
+    id: 'industria',
     title: '🏭 Datos de Industria',
     description: 'IPI manufacturero, PMI, producción automotriz, acero.',
     icon: '🏭',
@@ -59,7 +68,7 @@ export const COLOR_SCHEMES = {
   },
   purple: {
     bg: 'bg-purple-50 dark:bg-purple-900/20',
-    border: 'border-purple-200 dark:border-purple-800', 
+    border: 'border-purple-200 dark:border-purple-800',
     text: 'text-purple-900 dark:text-purple-100',
     accent: 'text-purple-600 dark:text-purple-400',
     button: 'bg-purple-600 hover:bg-purple-700'
@@ -67,7 +76,7 @@ export const COLOR_SCHEMES = {
   green: {
     bg: 'bg-green-50 dark:bg-green-900/20',
     border: 'border-green-200 dark:border-green-800',
-    text: 'text-green-900 dark:text-green-100', 
+    text: 'text-green-900 dark:text-green-100',
     accent: 'text-green-600 dark:text-green-400',
     button: 'bg-green-600 hover:bg-green-700'
   },
@@ -75,7 +84,7 @@ export const COLOR_SCHEMES = {
     bg: 'bg-indigo-50 dark:bg-indigo-900/20',
     border: 'border-indigo-200 dark:border-indigo-800',
     text: 'text-indigo-900 dark:text-indigo-100',
-    accent: 'text-indigo-600 dark:text-indigo-400', 
+    accent: 'text-indigo-600 dark:text-indigo-400',
     button: 'bg-indigo-600 hover:bg-indigo-700'
   },
   cyan: {
@@ -86,7 +95,7 @@ export const COLOR_SCHEMES = {
     button: 'bg-cyan-600 hover:bg-cyan-700'
   },
   orange: {
-    bg: 'bg-orange-50 dark:bg-orange-900/20', 
+    bg: 'bg-orange-50 dark:bg-orange-900/20',
     border: 'border-orange-200 dark:border-orange-800',
     text: 'text-orange-900 dark:text-orange-100',
     accent: 'text-orange-600 dark:text-orange-400',

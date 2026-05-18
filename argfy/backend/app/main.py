@@ -150,11 +150,24 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Tablas de base de datos verificadas")
 
-        from scripts.seed_plans import seed_plans
+        from .models import PlanFeature
+        PLAN_FEATURES = {
+            "free":       ["screener_basic"],
+            "pro":        ["screener_basic", "historical_prices", "metric_history", "csv_export"],
+            "enterprise": ["screener_basic", "historical_prices", "metric_history",
+                           "csv_export", "api_access", "team_invitations", "admin_etl_trigger"],
+        }
         db = next(get_db())
         try:
-            seed_plans(db)
-            logger.info("✅ Plan features seeded")
+            existing = db.query(PlanFeature).count()
+            if existing == 0:
+                for plan, features in PLAN_FEATURES.items():
+                    for fk in features:
+                        db.add(PlanFeature(plan=plan, feature_key=fk, enabled=True))
+                db.commit()
+                logger.info(f"✅ Plan features seeded ({sum(len(v) for v in PLAN_FEATURES.values())} rows)")
+            else:
+                logger.info(f"ℹ️ Plan features already seeded ({existing} rows)")
         except Exception as e:
             logger.warning(f"⚠️ Seed plans error: {e}")
         finally:
@@ -223,6 +236,10 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ✅ MIDDLEWARES
+from .middleware.rate_limit_middleware import RateLimitPlanMiddleware
+
+app.add_middleware(RateLimitPlanMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=getattr(settings, 'CORS_ORIGINS', ["*"]),

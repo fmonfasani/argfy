@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { ThemeToggle } from './ThemeToggle'
+import ThemeToggle from '../ThemeToggle'
 import { RefreshCw } from 'lucide-react'
 
 interface NavigationProps {

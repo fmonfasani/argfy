@@ -1,4 +1,3 @@
-// frontend/src/types/index.ts
 export interface EconomicIndicator {
   id: number
   indicator_type: string
@@ -52,6 +51,7 @@ export interface ChartDataPoint {
   value: number
   label?: string
 }
+
 export interface Indicator {
   id: string
   name: string
@@ -68,54 +68,40 @@ export interface Indicator {
   trend?: 'up' | 'down' | 'neutral'
 }
 
-  export interface Category {
-    id: string
-    title: string
-    description: string
-    icon: string
-    indicators: string[]
-    color: string
-  }
+export interface Category {
+  id: string
+  title: string
+  description: string
+  icon: string
+  indicators: string[]
+  color: string
+}
 
-  export interface HistoricalData {
-    date: string
-    value: number
-    period: string
-  }
+export interface ChartConfig {
+  type: 'line' | 'area' | 'bar'
+  period: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'MAX'
+  showGrid: boolean
+  showTooltip: boolean
+  animate: boolean
+}
 
-  export interface ChartConfig {
-    type: 'line' | 'area' | 'bar'
-    period: '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'MAX'
-    showGrid: boolean
-    showTooltip: boolean
-    animate: boolean
-  }
+export interface ModalConfig {
+  isOpen: boolean
+  indicator: Indicator | null
+  historicalData: HistoricalData[]
+  chartConfig: ChartConfig
+}
 
-  export interface ModalConfig {
-    isOpen: boolean
-    indicator: Indicator | null
-    historicalData: HistoricalData[]
-    chartConfig: ChartConfig
-  }
+export interface DashboardData {
+  economia: Record<string, Indicator>
+  gobierno: Record<string, Indicator>
+  finanzas: Record<string, Indicator>
+  mercados: Record<string, Indicator>
+  tecnologia: Record<string, Indicator>
+  industria: Record<string, Indicator>
+}
 
-  export interface APIResponse<T = any> {
-    status: 'success' | 'error'
-    data?: T
-    message?: string
-    timestamp: string
-  }
-
-  export interface DashboardData {
-    economia: Record<string, Indicator>
-    gobierno: Record<string, Indicator>
-    finanzas: Record<string, Indicator>
-    mercados: Record<string, Indicator>
-    tecnologia: Record<string, Indicator>
-    industria: Record<string, Indicator>
-  }
-  
-
-export type IndicatorType = 
+export type IndicatorType =
   | 'dolar_blue'
   | 'dolar_oficial'
   | 'dolar_mep'
@@ -125,7 +111,7 @@ export type IndicatorType =
   | 'tasa_bcra'
   | 'merval'
 
-export type NewsCategory = 
+export type NewsCategory =
   | 'ECONOMÍA'
   | 'MERCADOS'
   | 'COMMODITIES'
@@ -137,8 +123,3 @@ export interface LoadingState {
   isLoading: boolean
   error: string | null
 }
-
-
-
-
-
