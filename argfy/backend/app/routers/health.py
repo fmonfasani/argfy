@@ -3,6 +3,7 @@
 Router de Health Check y monitoreo del sistema
 """
 from fastapi import APIRouter, Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from datetime import datetime
 import psutil
@@ -33,7 +34,7 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         # Test de base de datos
         db_healthy = True
         try:
-            db.execute("SELECT 1")
+            db.execute(text("SELECT 1"))
         except Exception as e:
             db_healthy = False
             logger.error(f"Database health check failed: {e}")

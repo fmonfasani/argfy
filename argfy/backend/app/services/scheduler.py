@@ -12,6 +12,8 @@ from enum import Enum
 import signal
 import sys
 
+from sqlalchemy import text
+
 from ..config import settings
 from ..database import get_db
 from ..models import EconomicIndicator, HealthCheck
@@ -254,7 +256,7 @@ class UnifiedScheduler:
             # Check database
             try:
                 db = next(get_db())
-                db.execute("SELECT 1")
+                db.execute(text("SELECT 1"))
                 self.health.services["database"] = True
                 db.close()
             except:
