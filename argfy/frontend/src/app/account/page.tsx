@@ -74,14 +74,14 @@ export default function AccountPage() {
           <h3 className="text-white font-semibold mb-2">Actualizar plan</h3>
           <p className="text-slate-400 text-sm">Explorá los planes Pro y Enterprise</p>
         </Link>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
+        <Link href="/account/api-keys" className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all text-center">
           <h3 className="text-white font-semibold mb-2">API Keys</h3>
-          <p className="text-slate-400 text-sm">Próximamente</p>
-        </div>
-        <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
-          <h3 className="text-white font-semibold mb-2">Equipo</h3>
-          <p className="text-slate-400 text-sm">Próximamente</p>
-        </div>
+          <p className="text-slate-400 text-sm">Gestioná tus claves de API</p>
+        </Link>
+        <Link href="/account/billing" className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-amber-500/50 transition-all text-center">
+          <h3 className="text-white font-semibold mb-2">Facturación</h3>
+          <p className="text-slate-400 text-sm">Historial de pagos y facturas</p>
+        </Link>
       </div>
     </div>
   )
