@@ -61,7 +61,7 @@ export default function HomePage() {
               <h3 className="text-white font-semibold mb-2">Metodología</h3>
               <p className="text-slate-400 text-sm">Cálculo de ratios basado en reports SEC 10-K/Q</p>
             </div>
-            <Link href="/api" className="group bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:bg-slate-800 hover:border-amber-500/50 transition-all">
+            <Link href="/api" prefetch={false} className="group bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:bg-slate-800 hover:border-amber-500/50 transition-all">
               <div className="w-12 h-12 bg-amber-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-amber-500/20 transition-colors">
                 <span className="text-2xl">🔌</span>
               </div>
@@ -83,6 +83,7 @@ export default function HomePage() {
             </button>
             <Link 
               href="/api"
+              prefetch={false}
               className="inline-flex items-center px-8 py-4 border-2 border-slate-400 text-white font-semibold rounded-xl hover:bg-slate-800 hover:border-slate-300 transition-all"
             >
               <span className="mr-2">🔧</span>

@@ -52,25 +52,25 @@ export default function Header() {
           
           {/* Navigation Links - Desktop */}
           <nav className="hidden lg:flex items-center space-x-6 text-sm font-medium">
-            <Link href="/news" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/news" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               News
             </Link>
-            <Link href="/products" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/products" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               Products
             </Link>
-            <Link href="/api" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/api" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               APIs
             </Link>
-            <Link href="/analysis" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/analysis" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               Analysis
             </Link>
             <Link href="/cedears" className="text-amber-400 hover:text-amber-300 transition-colors font-semibold">
               CEDEARs
             </Link>
-            <Link href="/brokers" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/brokers" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               Brokers
             </Link>
-            <Link href="/communities" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/communities" prefetch={false} className="text-slate-300 hover:text-white transition-colors">
               Communities
             </Link>
             {loading ? (
@@ -134,16 +134,16 @@ export default function Header() {
 
             {/* Mobile Navigation */}
             <nav className="flex flex-col space-y-3">
-              <Link href="/news" className="text-slate-300 hover:text-white transition-colors py-2">
+              <Link href="/news" prefetch={false} className="text-slate-300 hover:text-white transition-colors py-2">
                 News
               </Link>
-              <Link href="/products" className="text-slate-300 hover:text-white transition-colors py-2">
+              <Link href="/products" prefetch={false} className="text-slate-300 hover:text-white transition-colors py-2">
                 Products
               </Link>
-              <Link href="/api" className="text-slate-300 hover:text-white transition-colors py-2">
+              <Link href="/api" prefetch={false} className="text-slate-300 hover:text-white transition-colors py-2">
                 APIs
               </Link>
-              <Link href="/analysis" className="text-slate-300 hover:text-white transition-colors py-2">
+              <Link href="/analysis" prefetch={false} className="text-slate-300 hover:text-white transition-colors py-2">
                 Analysis
               </Link>
               <div className="flex space-x-3 pt-4">

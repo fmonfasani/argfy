@@ -116,37 +116,37 @@ export default function Footer() {
             <div>
               <h4 className="text-white font-semibold mb-4">Productos</h4>
               <ul className="space-y-2">
-                <li><Link href="/dashboard" className="text-slate-300 hover:text-white transition-colors">Dashboard</Link></li>
-                <li><Link href="/api" className="text-slate-300 hover:text-white transition-colors">API</Link></li>
-                <li><Link href="/analytics" className="text-slate-300 hover:text-white transition-colors">Analytics</Link></li>
-                <li><Link href="/alerts" className="text-slate-300 hover:text-white transition-colors">Alertas</Link></li>
+                <li><Link href="/dashboard" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Dashboard</Link></li>
+                <li><Link href="/api" prefetch={false} className="text-slate-300 hover:text-white transition-colors">API</Link></li>
+                <li><Link href="/analytics" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Analytics</Link></li>
+                <li><Link href="/alerts" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Alertas</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Mercados</h4>
               <ul className="space-y-2">
-                <li><Link href="/forex" className="text-slate-300 hover:text-white transition-colors">Forex</Link></li>
-                <li><Link href="/stocks" className="text-slate-300 hover:text-white transition-colors">Acciones</Link></li>
-                <li><Link href="/bonds" className="text-slate-300 hover:text-white transition-colors">Bonos</Link></li>
-                <li><Link href="/commodities" className="text-slate-300 hover:text-white transition-colors">Commodities</Link></li>
+                <li><Link href="/forex" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Forex</Link></li>
+                <li><Link href="/stocks" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Acciones</Link></li>
+                <li><Link href="/bonds" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Bonos</Link></li>
+                <li><Link href="/commodities" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Commodities</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Recursos</h4>
               <ul className="space-y-2">
-                <li><Link href="/docs" className="text-slate-300 hover:text-white transition-colors">Documentación</Link></li>
-                <li><Link href="/tutorials" className="text-slate-300 hover:text-white transition-colors">Tutoriales</Link></li>
-                <li><Link href="/blog" className="text-slate-300 hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/help" className="text-slate-300 hover:text-white transition-colors">Ayuda</Link></li>
+                <li><Link href="/docs" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Documentación</Link></li>
+                <li><Link href="/tutorials" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Tutoriales</Link></li>
+                <li><Link href="/blog" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/help" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Ayuda</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-4">Empresa</h4>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-slate-300 hover:text-white transition-colors">Acerca de</Link></li>
-                <li><Link href="/careers" className="text-slate-300 hover:text-white transition-colors">Carreras</Link></li>
-                <li><Link href="/privacy" className="text-slate-300 hover:text-white transition-colors">Privacidad</Link></li>
-                <li><Link href="/terms" className="text-slate-300 hover:text-white transition-colors">Términos</Link></li>
+                <li><Link href="/about" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Acerca de</Link></li>
+                <li><Link href="/careers" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Carreras</Link></li>
+                <li><Link href="/privacy" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Privacidad</Link></li>
+                <li><Link href="/terms" prefetch={false} className="text-slate-300 hover:text-white transition-colors">Términos</Link></li>
               </ul>
             </div>
           </div>
