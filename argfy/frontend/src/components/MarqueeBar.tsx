@@ -25,7 +25,7 @@ interface MarqueeConfig {
 }
 
 interface MarqueeBarProps {
-  variant: 'international' | 'economic' | 'stocks'
+  variant: 'international' | 'economic' | 'stocks' | 'combined'
 }
 
 const ECONOMIC_DATA: MarqueeItem[] = [
@@ -42,6 +42,29 @@ const ECONOMIC_DATA: MarqueeItem[] = [
 ]
 
 const CONFIGS: Record<MarqueeBarProps['variant'], MarqueeConfig> = {
+  combined: {
+    colorTheme: 'celeste',
+    animationClass: 'marquee-left-fast',
+    useTradingView: true,
+    tradingViewTitle: 'Mercados',
+    tradingViewSymbols: [
+      { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
+      { proName: "FOREXCOM:NSXUSD", title: "NASDAQ" },
+      { proName: "FOREXCOM:DJI", title: "Dow Jones" },
+      { proName: "FX_IDC:EURUSD", title: "EUR/USD" },
+      { proName: "FX_IDC:USDARS", title: "USD/ARS" },
+      { proName: "TVC:GOLD", title: "Gold" },
+      { proName: "TVC:USOIL", title: "Oil" },
+      { proName: "CBOT:ZS1!", title: "Soybeans" },
+      { proName: "BITSTAMP:BTCUSD", title: "Bitcoin" },
+      { proName: "BYMA:GGAL", title: "GGAL" },
+      { proName: "BYMA:YPFD", title: "YPF" },
+      { proName: "BYMA:PAMP", title: "PAMP" },
+      { proName: "NASDAQ:GGAL", title: "GGAL ADR" },
+      { proName: "NYSE:YPF", title: "YPF ADR" },
+      { proName: "NASDAQ:MELI", title: "MELI" },
+    ],
+  },
   international: {
     colorTheme: 'celeste',
     animationClass: 'marquee-left-fast',

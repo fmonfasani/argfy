@@ -32,9 +32,7 @@ export default function RootLayout({
 
 
         <Header />
-        <MarqueeBar variant="international" />
-        <MarqueeBar variant="economic" />
-        <MarqueeBar variant="stocks" />
+        <MarqueeBar variant="combined" />
         
         
         {/* Contenido Principal */}
