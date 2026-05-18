@@ -94,7 +94,7 @@ mkdocs-material==9.5.3
 
 # Extras para funcionalidades avanzadas
 python-jose[cryptography]==3.3.0  # Para JWT en el futuro
-passlib[bcrypt]==1.7.4  # Para passwords en el futuro
+bcrypt==4.1.2  # Password hashing (usado directo, sin passlib)
 python-multipart==0.0.6  # Para file uploads
 emails==0.6  # Para notificaciones por email
 

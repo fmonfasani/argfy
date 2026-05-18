@@ -8,8 +8,8 @@ import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from ..config.config import settings
@@ -17,21 +17,20 @@ from ..models import User, Tenant, Subscription, ApiKey
 
 logger = logging.getLogger(__name__)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 ALGORITHM = settings.JWT_ALGORITHM
 SECRET = settings.JWT_SECRET
 EXPIRY_HOURS = settings.JWT_EXPIRY_HOURS
 
 
 # ── Password ──────────────────────────────────────────────
+# bcrypt limita passwords a 72 bytes. Truncamos defensivamente en ambos extremos.
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8")[:72], bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode("utf-8")[:72], hashed.encode("utf-8"))
 
 
 # ── JWT ───────────────────────────────────────────────────
