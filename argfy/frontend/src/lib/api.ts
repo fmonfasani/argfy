@@ -8,7 +8,7 @@ import {
   ScreenerFilters,
 } from "./types"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/v1"
 
 class ApiError extends Error {
   status: number
@@ -25,7 +25,7 @@ async function apiFetch<T>(
   params: Record<string, unknown> | null,
   schema: z.ZodSchema<T>,
 ): Promise<T> {
-  const url = new URL(`${API_BASE}/api/v1${path}`)
+  const url = new URL(`${API_BASE}${path}`)
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== "") {

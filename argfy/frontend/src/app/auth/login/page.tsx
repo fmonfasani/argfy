@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       const res = await login(email, password)
       setUser(res.user, res.access_token)
-      router.push("/account")
+      router.push("/")
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {

@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/v1"
 
 export interface AuthUser {
   id: string
@@ -22,7 +22,7 @@ interface TokenResponse {
 }
 
 export async function register(email: string, password: string, nombre?: string): Promise<TokenResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
+  const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, nombre }),
@@ -35,7 +35,7 @@ export async function register(email: string, password: string, nombre?: string)
 }
 
 export async function login(email: string, password: string): Promise<TokenResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+  const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -48,7 +48,7 @@ export async function login(email: string, password: string): Promise<TokenRespo
 }
 
 export async function googleAuth(code: string): Promise<TokenResponse> {
-  const res = await fetch(`${API_BASE}/api/v1/auth/google`, {
+  const res = await fetch(`${API_BASE}/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),
@@ -61,7 +61,7 @@ export async function googleAuth(code: string): Promise<TokenResponse> {
 }
 
 export async function fetchMe(token: string): Promise<AuthUser> {
-  const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
+  const res = await fetch(`${API_BASE}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error("Unauthorized")
