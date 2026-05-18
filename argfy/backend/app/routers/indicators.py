@@ -15,6 +15,99 @@ from ..config.indicators_mapping import ALL_INDICATORS
 
 router = APIRouter()
 
+@router.get("/indicators/search")
+async def search_indicators(
+    q: str = Query(..., description="Término de búsqueda"),
+    source: Optional[str] = Query(None, description="Filtrar por fuente"),
+    category: Optional[str] = Query(None, description="Filtrar por categoría"),
+    db: Session = Depends(get_db)
+):
+    """Buscar indicadores"""
+    try:
+        query = db.query(EconomicIndicator).filter(
+            EconomicIndicator.is_active == True
+        )
+
+        # Filtro de búsqueda en label o indicator_type
+        search_term = f"%{q.lower()}%"
+        query = query.filter(
+            (func.lower(EconomicIndicator.label).like(search_term)) |
+            (func.lower(EconomicIndicator.indicator_type).like(search_term))
+        )
+
+        # Filtros adicionales
+        if source:
+            query = query.filter(EconomicIndicator.source == source.upper())
+
+        if category:
+            query = query.filter(EconomicIndicator.category == category.lower())
+
+        # Obtener solo el más reciente de cada tipo
+        subquery = query.with_entities(
+            EconomicIndicator.indicator_type,
+            func.max(EconomicIndicator.date).label('max_date')
+        ).group_by(EconomicIndicator.indicator_type).subquery()
+
+        results = db.query(EconomicIndicator).join(
+            subquery,
+            (EconomicIndicator.indicator_type == subquery.c.indicator_type) &
+            (EconomicIndicator.date == subquery.c.max_date)
+        ).limit(20).all()
+
+        return {
+            "status": "success",
+            "query": q,
+            "filters": {"source": source, "category": category},
+            "results": [
+                {
+                    "indicator_type": r.indicator_type,
+                    "label": r.label,
+                    "value": r.value,
+                    "source": r.source,
+                    "category": r.category,
+                    "date": r.date.isoformat()
+                }
+                for r in results
+            ],
+            "count": len(results)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/indicators/stats")
+async def get_indicators_stats(db: Session = Depends(get_db)):
+    """Obtener estadísticas de indicadores"""
+    try:
+        total_indicators = db.query(EconomicIndicator).filter(
+            EconomicIndicator.is_active == True
+        ).count()
+
+        sources_stats = db.query(
+            EconomicIndicator.source,
+            func.count(EconomicIndicator.id).label('count')
+        ).filter(
+            EconomicIndicator.is_active == True
+        ).group_by(EconomicIndicator.source).all()
+
+        categories_stats = db.query(
+            EconomicIndicator.category,
+            func.count(EconomicIndicator.id).label('count')
+        ).filter(
+            EconomicIndicator.is_active == True
+        ).group_by(EconomicIndicator.category).all()
+
+        return {
+            "status": "success",
+            "total_indicators": total_indicators,
+            "by_source": {stat.source: stat.count for stat in sources_stats if stat.source},
+            "by_category": {stat.category: stat.count for stat in categories_stats if stat.category},
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/indicators/current")
 async def get_current_indicators(db: Session = Depends(get_db)):
     """Obtener indicadores económicos actuales"""
@@ -56,6 +149,54 @@ async def get_current_indicators(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching indicators: {str(e)}")
 
+@router.post("/indicators/refresh")
+async def refresh_indicators(background_tasks: BackgroundTasks):
+    """Forzar actualización de indicadores"""
+
+    async def update_task():
+        try:
+            async with bcra_service as service:
+                data = await service.get_current_indicators()
+
+                if data.get("indicators"):
+                    db = next(get_db())
+                    try:
+                        for key, indicator_data in data["indicators"].items():
+                            # Desactivar indicadores anteriores
+                            db.query(EconomicIndicator).filter(
+                                EconomicIndicator.indicator_type == key,
+                                EconomicIndicator.is_active == True
+                            ).update({"is_active": False})
+
+                            # Crear nuevo indicador
+                            new_indicator = EconomicIndicator(
+                                indicator_type=key,
+                                value=indicator_data["value"],
+                                source=indicator_data["source"],
+                                unit=indicator_data.get("unit"),
+                                label=indicator_data.get("label"),
+                                category=indicator_data.get("category"),
+                                date=datetime.now(),
+                                is_active=True
+                            )
+                            db.add(new_indicator)
+
+                        db.commit()
+                        print("✅ Indicators refreshed successfully")
+                    finally:
+                        db.close()
+
+        except Exception as e:
+            print(f"❌ Error refreshing indicators: {e}")
+
+    background_tasks.add_task(update_task)
+
+    return {
+        "status": "success",
+        "message": "Actualización iniciada en segundo plano",
+        "timestamp": datetime.now().isoformat()
+    }
+
 @router.get("/indicators/{indicator_type}")
 async def get_indicator_by_type(
     indicator_type: str,
@@ -70,7 +211,7 @@ async def get_indicator_by_type(
 
         if not indicator:
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=f"Indicator '{indicator_type}' not found"
             )
 
@@ -102,7 +243,7 @@ async def get_historical_data(
     """Obtener datos históricos de un indicador"""
     try:
         cutoff_date = datetime.now() - timedelta(days=days)
-        
+
         # Buscar en HistoricalData primero
         historical_data = db.query(HistoricalData).filter(
             HistoricalData.indicator_type == indicator_type,
@@ -118,7 +259,7 @@ async def get_historical_data(
 
         if not historical_data:
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=f"No historical data found for '{indicator_type}'"
             )
 
@@ -141,146 +282,5 @@ async def get_historical_data(
 
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/indicators/refresh")
-async def refresh_indicators(background_tasks: BackgroundTasks):
-    """Forzar actualización de indicadores"""
-    
-    async def update_task():
-        try:
-            async with bcra_service as service:
-                data = await service.get_current_indicators()
-                
-                if data.get("indicators"):
-                    db = next(get_db())
-                    try:
-                        for key, indicator_data in data["indicators"].items():
-                            # Desactivar indicadores anteriores
-                            db.query(EconomicIndicator).filter(
-                                EconomicIndicator.indicator_type == key,
-                                EconomicIndicator.is_active == True
-                            ).update({"is_active": False})
-                            
-                            # Crear nuevo indicador
-                            new_indicator = EconomicIndicator(
-                                indicator_type=key,
-                                value=indicator_data["value"],
-                                source=indicator_data["source"],
-                                unit=indicator_data.get("unit"),
-                                label=indicator_data.get("label"),
-                                category=indicator_data.get("category"),
-                                date=datetime.now(),
-                                is_active=True
-                            )
-                            db.add(new_indicator)
-                        
-                        db.commit()
-                        print("✅ Indicators refreshed successfully")
-                    finally:
-                        db.close()
-                        
-        except Exception as e:
-            print(f"❌ Error refreshing indicators: {e}")
-    
-    background_tasks.add_task(update_task)
-    
-    return {
-        "status": "success",
-        "message": "Actualización iniciada en segundo plano",
-        "timestamp": datetime.now().isoformat()
-    }
-
-@router.get("/indicators/search")
-async def search_indicators(
-    q: str = Query(..., description="Término de búsqueda"),
-    source: Optional[str] = Query(None, description="Filtrar por fuente"),
-    category: Optional[str] = Query(None, description="Filtrar por categoría"),
-    db: Session = Depends(get_db)
-):
-    """Buscar indicadores"""
-    try:
-        query = db.query(EconomicIndicator).filter(
-            EconomicIndicator.is_active == True
-        )
-        
-        # Filtro de búsqueda en label o indicator_type
-        search_term = f"%{q.lower()}%"
-        query = query.filter(
-            (func.lower(EconomicIndicator.label).like(search_term)) |
-            (func.lower(EconomicIndicator.indicator_type).like(search_term))
-        )
-        
-        # Filtros adicionales
-        if source:
-            query = query.filter(EconomicIndicator.source == source.upper())
-        
-        if category:
-            query = query.filter(EconomicIndicator.category == category.lower())
-        
-        # Obtener solo el más reciente de cada tipo
-        subquery = query.with_entities(
-            EconomicIndicator.indicator_type,
-            func.max(EconomicIndicator.date).label('max_date')
-        ).group_by(EconomicIndicator.indicator_type).subquery()
-        
-        results = db.query(EconomicIndicator).join(
-            subquery,
-            (EconomicIndicator.indicator_type == subquery.c.indicator_type) &
-            (EconomicIndicator.date == subquery.c.max_date)
-        ).limit(20).all()
-        
-        return {
-            "status": "success",
-            "query": q,
-            "filters": {"source": source, "category": category},
-            "results": [
-                {
-                    "indicator_type": r.indicator_type,
-                    "label": r.label,
-                    "value": r.value,
-                    "source": r.source,
-                    "category": r.category,
-                    "date": r.date.isoformat()
-                }
-                for r in results
-            ],
-            "count": len(results)
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/indicators/stats")
-async def get_indicators_stats(db: Session = Depends(get_db)):
-    """Obtener estadísticas de indicadores"""
-    try:
-        total_indicators = db.query(EconomicIndicator).filter(
-            EconomicIndicator.is_active == True
-        ).count()
-        
-        sources_stats = db.query(
-            EconomicIndicator.source,
-            func.count(EconomicIndicator.id).label('count')
-        ).filter(
-            EconomicIndicator.is_active == True
-        ).group_by(EconomicIndicator.source).all()
-        
-        categories_stats = db.query(
-            EconomicIndicator.category,
-            func.count(EconomicIndicator.id).label('count')
-        ).filter(
-            EconomicIndicator.is_active == True
-        ).group_by(EconomicIndicator.category).all()
-        
-        return {
-            "status": "success",
-            "total_indicators": total_indicators,
-            "by_source": {stat.source: stat.count for stat in sources_stats if stat.source},
-            "by_category": {stat.category: stat.count for stat in categories_stats if stat.category},
-            "timestamp": datetime.now().isoformat()
-        }
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
