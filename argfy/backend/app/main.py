@@ -79,8 +79,6 @@ def load_router(router_name: str, module_path: str):
 # ✅ CARGAR TODOS LOS ROUTERS
 routers_config = [
     ("indicators", "app.routers.indicators"),
-    ("health", "app.routers.health"),
-    ("expanded_indicators", "app.routers.expanded_indicators"),
     ("fundamentals", "app.routers.fundamentals"),
     ("admin", "app.routers.admin"),
     ("auth", "app.routers.auth"),
