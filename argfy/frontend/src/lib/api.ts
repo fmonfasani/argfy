@@ -75,28 +75,3 @@ export const fundamentals = {
       MetricHistoryResponseSchema,
     ),
 }
-
-async function apiGet(path: string) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(10000),
-  })
-  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => ({})))
-  return res.json()
-}
-
-export const api = {
-  getDashboard: () => apiGet('/dashboard/complete'),
-  getCategory: (category: string) => apiGet(`/indicators/${category}`),
-  getIndicator: (id: string) => apiGet(`/indicators/${id}`),
-  getHistorical: (id: string, days: number = 30) => apiGet(`/indicators/${id}/historical?days=${days}`),
-  search: (query: string, category?: string) =>
-    apiGet(`/indicators/search?q=${query}${category ? `&category=${category}` : ''}`),
-  getCategories: () => apiGet('/config/categories'),
-  getConfig: () => apiGet('/config/indicators'),
-  getHealth: () => apiGet('/health/detailed'),
-  getStats: () => apiGet('/stats'),
-  refresh: () => fetch(`${API_BASE}/indicators/refresh`, { method: 'POST' }).then(r => r.json()),
-  refreshIndicator: (id: string) =>
-    fetch(`${API_BASE}/indicators/${id}/refresh`, { method: 'POST' }).then(r => r.json()),
-}
