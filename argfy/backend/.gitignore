@@ -1,13 +1,9 @@
 .env
 __pycache__/
 *.py[cod]
-backend/data/
-.venv
-# Pytest cache
-.cache
-# mypy cache
-.mypy_cache/
-venv/
-.env.production
-.env.development
+data/
+logs/
 .venv/
+.mypy_cache/
+.pytest_cache/
+*.db
