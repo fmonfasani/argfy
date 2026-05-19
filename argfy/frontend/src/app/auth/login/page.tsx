@@ -1,28 +1,29 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { login } from "@/lib/auth"
-import { useAuth } from "@/hooks/useAuth"
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { login } from '@/lib/auth'
+import { useAuth } from '@/hooks/useAuth'
+import { Input, Button, Alert } from '@/components/ui'
 
 export default function LoginPage() {
   const router = useRouter()
   const { setUser } = useAuth()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError('')
     setLoading(true)
     try {
       const res = await login(email, password)
       setUser(res.user, res.access_token)
-      router.push("/")
+      router.push('/')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -36,43 +37,34 @@ export default function LoginPage() {
           <p className="text-slate-400 mb-6">Accedé a tu cuenta de Argfy</p>
 
           {error && (
-            <div className="bg-red-900/30 border border-red-800 text-red-400 rounded-lg px-4 py-3 mb-4 text-sm">
+            <Alert variant="error" onClose={() => setError('')} className="mb-6">
               {error}
-            </div>
+            </Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-amber-600 text-slate-900 font-semibold rounded-lg hover:bg-amber-500 transition-colors disabled:opacity-50"
-            >
-              {loading ? "Ingresando..." : "Ingresar"}
-            </button>
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              placeholder="tu@email.com"
+            />
+            <Input
+              label="Contraseña"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+            <Button variant="primary" type="submit" className="w-full" loading={loading}>
+              Ingresar
+            </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-slate-400">
-            ¿No tenés cuenta?{" "}
+            ¿No tenés cuenta?{' '}
             <Link href="/auth/register" className="text-amber-400 hover:underline">
               Registrate
             </Link>

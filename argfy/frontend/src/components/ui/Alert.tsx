@@ -32,13 +32,14 @@ interface AlertProps {
   title?: string
   children: ReactNode
   onClose?: () => void
+  className?: string
 }
 
-function Alert({ variant = 'info', title, children, onClose }: AlertProps) {
+function Alert({ variant = 'info', title, children, onClose, className = '' }: AlertProps) {
   const style = VARIANTS[variant]
 
   return (
-    <div className={`flex gap-3 p-4 rounded-lg border ${style.bg} ${style.border}`}>
+    <div className={`flex gap-3 p-4 rounded-lg border ${style.bg} ${style.border} ${className}`}>
       <span className="text-lg flex-shrink-0">{style.icon}</span>
       <div className="flex-1 min-w-0">
         {title && <p className={`font-semibold ${style.text} text-sm`}>{title}</p>}

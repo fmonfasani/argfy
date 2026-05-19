@@ -1,29 +1,30 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { register } from "@/lib/auth"
-import { useAuth } from "@/hooks/useAuth"
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { register } from '@/lib/auth'
+import { useAuth } from '@/hooks/useAuth'
+import { Input, Button, Alert } from '@/components/ui'
 
 export default function RegisterPage() {
   const router = useRouter()
   const { setUser } = useAuth()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [nombre, setNombre] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError('')
     setLoading(true)
     try {
       const res = await register(email, password, nombre)
       setUser(res.user, res.access_token)
-      router.push("/")
+      router.push('/')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Registration failed")
+      setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -37,53 +38,43 @@ export default function RegisterPage() {
           <p className="text-slate-400 mb-6">Registrate en Argfy gratis</p>
 
           {error && (
-            <div className="bg-red-900/30 border border-red-800 text-red-400 rounded-lg px-4 py-3 mb-4 text-sm">
+            <Alert variant="error" onClose={() => setError('')} className="mb-6">
               {error}
-            </div>
+            </Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Nombre</label>
-              <input
-                type="text"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Contraseña</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-amber-600 text-slate-900 font-semibold rounded-lg hover:bg-amber-500 transition-colors disabled:opacity-50"
-            >
-              {loading ? "Creando cuenta..." : "Crear cuenta"}
-            </button>
+            <Input
+              label="Nombre"
+              type="text"
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              placeholder="Tu nombre"
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              placeholder="tu@email.com"
+            />
+            <Input
+              label="Contraseña"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              minLength={6}
+              hint="Mínimo 6 caracteres"
+            />
+            <Button variant="primary" type="submit" className="w-full" loading={loading}>
+              Crear cuenta
+            </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-slate-400">
-            ¿Ya tenés cuenta?{" "}
+            ¿Ya tenés cuenta?{' '}
             <Link href="/auth/login" className="text-amber-400 hover:underline">
               Iniciá sesión
             </Link>
