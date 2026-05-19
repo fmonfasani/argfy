@@ -1,8 +1,6 @@
 """
 Tests de endpoints críticos: /screener, /coverage, detail.
 """
-import pytest
-from fastapi import status
 
 
 class TestScreener:
