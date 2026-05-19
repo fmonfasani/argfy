@@ -147,9 +147,13 @@ CREATE TABLE IF NOT EXISTS ratios_quarterly (
 
     PRIMARY KEY (byma_ticker, period_end)
 );
-CREATE INDEX IF NOT EXISTS idx_ratios_per         ON ratios_quarterly(per_ttm)     WHERE per_ttm     IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_ratios_roe         ON ratios_quarterly(roe_cagr_5y) WHERE roe_cagr_5y IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_ratios_period_end  ON ratios_quarterly(period_end);
+CREATE INDEX IF NOT EXISTS idx_ratios_per                ON ratios_quarterly(per_ttm)                  WHERE per_ttm                  IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_roe                ON ratios_quarterly(roe_cagr_5y)              WHERE roe_cagr_5y              IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_margen_neto_ttm    ON ratios_quarterly(margen_neto_ttm)          WHERE margen_neto_ttm          IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_deuda_total_ebitda ON ratios_quarterly(deuda_total_sobre_ebitda) WHERE deuda_total_sobre_ebitda IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_payout_ttm         ON ratios_quarterly(payout_ttm)               WHERE payout_ttm               IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_exchange           ON ratios_quarterly(exchange)                 WHERE exchange                 IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ratios_period_end         ON ratios_quarterly(period_end);
 
 -- =========================================================================
 -- fx_rates — USD/ARS (CCL, MEP, oficial) diario

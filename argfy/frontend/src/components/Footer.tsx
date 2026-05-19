@@ -47,7 +47,7 @@ export default function Footer() {
         <div className="border-t border-slate-700 pt-6">
           <p className="text-xs text-slate-500 text-center max-w-4xl mx-auto leading-relaxed">
             La información provista no constituye asesoramiento financiero ni recomendación de inversión.
-            Los datos son provistos "as-is" con fines informativos. Consulte a un agente registrado ante la
+            Los datos son provistos &quot;as-is&quot; con fines informativos. Consulte a un agente registrado ante la
             Comisión Nacional de Valores (CNV) antes de tomar decisiones de inversión. Las inversiones en
             CEDEARs y acciones conllevan riesgo de pérdida de capital.
           </p>

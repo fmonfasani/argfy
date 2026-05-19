@@ -1,7 +1,23 @@
 """
 Tests de auth: register → login → JWT → protected endpoint.
 """
+import time
+from datetime import datetime, timedelta
+
+import bcrypt
+import pytest
 from fastapi import status
+from jose import jwt
+
+from app.services.auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    decode_access_token,
+    generate_api_key,
+    hash_api_key,
+)
+from app.config.config import settings
 
 
 class TestAuth:

@@ -67,6 +67,7 @@ export default function FilterSidebar({ filters, onFiltersChange, isOpen, onClos
     if (debouncedQ !== (filters.q ?? "")) {
       onFiltersChange({ ...filters, q: debouncedQ || undefined })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQ])
 
   function set<K extends keyof ScreenerFilters>(key: K, value: ScreenerFilters[K]) {
