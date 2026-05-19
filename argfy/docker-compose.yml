@@ -1,22 +1,97 @@
+# ============================================
+# Argfy Platform - Docker Compose (Coolify)
+# ============================================
+# Deploy via Coolify:
+# 1. New Resource → Docker Compose
+# 2. Point to this repo
+# 3. Set environment variables below
+# ============================================
+
 services:
-  postgres:
+  # ── Database ──────────────────────────────
+  db:
     image: postgres:16-alpine
-    container_name: argfy-postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_DB:       ${POSTGRES_DB:-argfy}
-      POSTGRES_USER:     ${POSTGRES_USER:-argfy}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-argfy_dev}
-    ports:
-      - "${POSTGRES_PORT:-5544}:5432"
     volumes:
-      - argfy_pgdata:/var/lib/postgresql/data
-      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: argfy
+      POSTGRES_USER: argfy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-argfy_dev_password_change_me}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-argfy} -d ${POSTGRES_DB:-argfy}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      test: ["CMD-SHELL", "pg_isready -U argfy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - coolify.managed=true
+
+  # ── Backend (FastAPI) ─────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://argfy:${POSTGRES_PASSWORD:-argfy_dev_password_change_me}@db:5432/argfy
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: INFO
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRY_HOURS: "72"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      MP_SUCCESS_URL: ${MP_SUCCESS_URL}
+      MP_FAILURE_URL: ${MP_FAILURE_URL}
+      MP_PENDING_URL: ${MP_PENDING_URL}
+      CORS_ORIGINS: '["${FRONTEND_URL}"]'
+      REDIS_URL: ""
+      CACHE_TTL: "300"
+      RATE_LIMIT_PER_MINUTE: "60"
+      ENABLE_SCHEDULER: "true"
+      DATA_REFRESH_INTERVAL: "900"
+      UPDATE_INTERVAL_MINUTES: "15"
+      DEMO_MODE: "false"
+      ENABLE_MONITORING: "true"
+      SENTRY_DSN: ${SENTRY_DSN}
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      - coolify.managed=true
+      - coolify.port.8000=true
+
+  # ── Frontend (Next.js) ────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+      NODE_ENV: production
+    expose:
+      - "3000"
+    labels:
+      - coolify.managed=true
+      - coolify.port.3000=true
 
 volumes:
-  argfy_pgdata:
+  pgdata:
