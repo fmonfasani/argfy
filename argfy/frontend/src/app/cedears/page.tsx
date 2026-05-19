@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import FilterSidebar from "@/components/screener/FilterSidebar"
 import ScreenerTable from "@/components/screener/ScreenerTable"
 import { useScreener } from "@/hooks/useScreener"
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner"
 import type { ScreenerFilters } from "@/lib/types"
 
 function parseFilters(sp: URLSearchParams): ScreenerFilters {
@@ -86,7 +87,7 @@ function CedearsContent() {
       <div className="lg:hidden mb-4">
         <button
           onClick={() => setMobileFiltersOpen(true)}
-          className="px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-600 text-sm"
+          className="px-4 py-2 bg-slate-800 text-white rounded-md border border-slate-700 text-sm hover:bg-slate-700 transition-colors"
         >
           Filtrar
         </button>
@@ -101,26 +102,35 @@ function CedearsContent() {
         />
 
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-white mb-1">Screener de CEDEARs</h1>
-          <p className="text-slate-400 text-sm mb-6">
-            {data ? `${data.total} tickers encontrados` : "Cargando..."}
-          </p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Screener de CEDEARs</h1>
+              <p className="text-slate-400 text-sm mt-1">
+                {data ? `${data.total} tickers` : isLoading ? "Cargando datos..." : "Sin resultados"}
+              </p>
+            </div>
+            {isLoading && <LoadingSpinner size="sm" />}
+          </div>
 
           {isError ? (
-            <div className="text-center py-16">
-              <p className="text-lg text-red-400 mb-2">Error al cargar datos</p>
-              <p className="text-sm text-slate-500 mb-4">No se pudo conectar con el servidor.</p>
+            <div className="text-center py-20 bg-slate-800/30 rounded-xl border border-slate-700/50">
+              <svg className="w-12 h-12 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <p className="text-lg text-slate-300 mb-2">Error al cargar datos</p>
+              <p className="text-sm text-slate-500 mb-6">No se pudo conectar con el servidor.</p>
               <button
                 onClick={() => refetch()}
-                className="px-4 py-2 bg-amber-500 text-slate-900 rounded-lg font-semibold hover:bg-amber-400 transition-colors"
+                className="px-5 py-2 bg-amber-500 text-slate-900 rounded-md font-semibold hover:bg-amber-400 transition-colors"
               >
                 Reintentar
               </button>
             </div>
           ) : isLoading ? (
-            <div className="animate-pulse space-y-3">
+            <div className="space-y-2">
+              <div className="h-10 bg-slate-800/50 rounded animate-pulse" />
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-10 bg-slate-800 rounded" />
+                <div key={i} className="h-10 bg-slate-800/30 rounded animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
               ))}
             </div>
           ) : data && data.data.length > 0 ? (
@@ -131,12 +141,15 @@ function CedearsContent() {
               onPage={handlePage}
             />
           ) : (
-            <div className="text-center py-16">
-              <p className="text-lg text-slate-400 mb-2">Sin resultados</p>
-              <p className="text-sm text-slate-500 mb-4">Probá ajustar los filtros o resetearlos.</p>
+            <div className="text-center py-20 bg-slate-800/30 rounded-xl border border-slate-700/50">
+              <svg className="w-12 h-12 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <p className="text-lg text-slate-300 mb-2">Sin resultados</p>
+              <p className="text-sm text-slate-500 mb-6">Probá ajustar los filtros o resetearlos.</p>
               <button
                 onClick={() => { syncFilters({}); setMobileFiltersOpen(false) }}
-                className="px-4 py-2 border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-800 transition-colors"
+                className="px-5 py-2 border border-slate-600 text-slate-300 rounded-md hover:bg-slate-800 transition-colors"
               >
                 Resetear filtros
               </button>

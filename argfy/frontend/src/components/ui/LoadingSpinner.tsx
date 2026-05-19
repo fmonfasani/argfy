@@ -1,28 +1,16 @@
-
 'use client'
-import React from 'react'
 
 interface LoadingSpinnerProps {
-  size?: 'small' | 'medium' | 'large'
-  color?: string
+  size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
-function LoadingSpinner({ 
-  size = 'medium', 
-  color = 'text-blue-600',
-  className = '' 
-}: LoadingSpinnerProps) {
-  const sizeClasses = {
-    small: 'h-4 w-4',
-    medium: 'h-8 w-8', 
-    large: 'h-12 w-12'
-  }
+export function LoadingSpinner({ size = 'md', className = '' }: LoadingSpinnerProps) {
+  const sizes = { sm: 'h-4 w-4', md: 'h-8 w-8', lg: 'h-12 w-12' }
 
   return (
-    <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-current ${sizeClasses[size]} ${color} ${className}`} />
+    <div className={`animate-spin rounded-full border-2 border-slate-600 border-t-amber-400 ${sizes[size]} ${className}`} />
   )
 }
 
-export { LoadingSpinner }
 export default LoadingSpinner

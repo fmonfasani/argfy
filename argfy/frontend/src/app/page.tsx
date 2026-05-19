@@ -1,12 +1,10 @@
 'use client'
 import CedearsLeaderboard from '@/components/CedearsLeaderboard'
 import EconomicDataCards from '@/components/EconomicDataCards'
-import Footer from '@/components/Footer'
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -36,23 +34,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Live Economic Data */}
-      <section className="py-12 bg-slate-50">
+      <section className="py-12 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">Indicadores en vivo</h2>
+          <h2 className="text-2xl font-bold text-white mb-8">Indicadores en vivo</h2>
           <EconomicDataCards />
         </div>
       </section>
 
-      {/* CEDEARs Leaderboard */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">CEDEARs más atractivos</h2>
-          <CedearsLeaderboard />
-        </div>
-      </section>
+      <CedearsLeaderboard />
 
-      <Footer />
+      <footer className="border-t border-slate-800 py-8 text-center text-slate-600 text-sm">
+        <p>La información provista no constituye asesoramiento financiero.</p>
+        <p className="mt-1">Datos provistos &quot;as-is&quot; con fines informativos. Consulte a un agente registrado ante la CNV.</p>
+        <p className="mt-4 text-slate-700">© {new Date().getFullYear()} Argfy</p>
+      </footer>
     </>
   )
 }

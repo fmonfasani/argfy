@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import '@/styles/tokens.css'
 import MarqueeBar from '@/components/MarqueeBar'
-import Header from '@/components/Header'
+import Sidebar from '@/components/layout/Sidebar'
+import Topbar from '@/components/layout/Topbar'
 import Providers from '@/components/Providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -29,18 +30,16 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth dark" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen`}>
-
-
-        <Header />
-        <MarqueeBar variant="combined" />
-        
-        
-        {/* Contenido Principal */}
-        <main className="relative">
-          <Providers>
-            {children}
-          </Providers>
-        </main>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <Topbar />
+            <MarqueeBar variant="combined" />
+            <main className="flex-1">
+              <Providers>{children}</Providers>
+            </main>
+          </div>
+        </div>
       </body>
     </html>
   )
