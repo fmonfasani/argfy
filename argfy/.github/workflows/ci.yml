@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint backend
+        working-directory: backend
+        run: ruff check app
+
+  backend-test:
+    runs-on: ubuntu-latest
+    needs: backend-lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt pytest
+      - name: Run tests
+        working-directory: backend
+        run: pytest -q
+
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE: http://localhost:8000/api/v1
+          NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+
+  docker-compose:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate docker-compose
+        run: |
+          command -v docker-compose || sudo apt-get install -y docker-compose
+          docker-compose config --quiet
+        working-directory: .
