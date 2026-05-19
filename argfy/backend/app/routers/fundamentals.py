@@ -8,15 +8,20 @@ Endpoints:
 - GET /api/v1/fundamentals/{byma_ticker}/price     histórico de precios diarios
 - GET /api/v1/fundamentals/{byma_ticker}/history   serie temporal de una métrica
 """
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 from typing import Optional
 
 from ..database import get_db
 from ..models import Company, RatioQuarterly, PriceDaily
 from ..middleware.feature_gate import require_feature
+from ..schemas.fundamentals import (
+    ScreenerResponse,
+    CoverageResponse,
+    TickerDetail,
+)
 
 router = APIRouter(prefix="/api/v1/fundamentals", tags=["fundamentals"])
 
@@ -77,7 +82,7 @@ def _last_period_subquery(db: Session):
     )
 
 
-@router.get("/screener")
+@router.get("/screener", response_model=ScreenerResponse)
 def screener(
     per_max:    Optional[float] = Query(None, description="PER TTM máximo"),
     per_min:    Optional[float] = Query(None, description="PER TTM mínimo"),
@@ -158,30 +163,41 @@ def screener(
     }
 
 
-@router.get("/coverage")
+@router.get("/coverage", response_model=CoverageResponse)
 def coverage(db: Session = Depends(get_db)):
-    """Stats: cuántos tickers tienen cada ratio en el último snapshot."""
+    """Stats: cuántos tickers tienen cada ratio en el último snapshot.
+    Una sola query con conditional aggregates en vez de N+1."""
     sub = _last_period_subquery(db)
-    base = (
-        db.query(RatioQuarterly)
-        .join(sub, and_(
-            RatioQuarterly.byma_ticker == sub.c.byma_ticker,
-            RatioQuarterly.period_end  == sub.c.max_period,
-        ))
-    )
-    total = base.count()
-    if total == 0:
-        return {"total": 0, "coverage": {}}
-
     campos = [
         "per_ttm", "eps_ttm_diluted", "margen_neto_ttm", "roe_cagr_5y",
         "deuda_lp_sobre_ebitda", "deuda_total_sobre_ebitda",
         "fcfonce_equity_lp", "fcfonce_neto_caja", "payout_ttm",
     ]
-    cov = {}
+
+    columns = [func.count().label("total")]
     for c in campos:
         col = getattr(RatioQuarterly, c)
-        n = base.filter(col.isnot(None)).count()
+        columns.append(
+            func.sum(case((col.isnot(None), 1), else_=0)).label(c)
+        )
+
+    row = (
+        db.query(*columns)
+        .select_from(RatioQuarterly)
+        .join(sub, and_(
+            RatioQuarterly.byma_ticker == sub.c.byma_ticker,
+            RatioQuarterly.period_end  == sub.c.max_period,
+        ))
+        .one()
+    )
+
+    total = int(row.total or 0)
+    if total == 0:
+        return {"total": 0, "coverage": {}}
+
+    cov = {}
+    for c in campos:
+        n = int(getattr(row, c) or 0)
         cov[c] = {"con_dato": n, "pct": round(n / total * 100, 1)}
 
     return {"total": total, "coverage": cov}
@@ -256,7 +272,6 @@ def metric_history(
     if not rows:
         raise HTTPException(404, detail=f"No history for '{byma_ticker}' / metric '{metric}'")
 
-    col = getattr(RatioQuarterly, metric)
     return {
         "byma_ticker": byma_ticker.upper(),
         "metric": metric,
@@ -268,7 +283,7 @@ def metric_history(
     }
 
 
-@router.get("/{byma_ticker}")
+@router.get("/{byma_ticker}", response_model=TickerDetail)
 def detalle(byma_ticker: str, db: Session = Depends(get_db)):
     """Detalle de un BYMA ticker (último snapshot)."""
     r = (

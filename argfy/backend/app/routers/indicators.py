@@ -5,7 +5,7 @@ Router principal de indicadores económicos
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime, timedelta
 
 from ..database import get_db
@@ -13,7 +13,7 @@ from ..models import EconomicIndicator, HistoricalData
 from ..services.bcra_service import bcra_service
 from ..config.indicators_mapping import ALL_INDICATORS
 
-router = APIRouter()
+router = APIRouter(tags=["indicators"])
 
 @router.get("/indicators/search")
 async def search_indicators(
