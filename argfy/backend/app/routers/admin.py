@@ -4,7 +4,7 @@ Admin endpoints for ETL management + Dashboard + Team + Billing.
 import uuid
 import logging
 import secrets
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -13,7 +13,6 @@ from ..database import get_db
 from ..models import ETLRun, User, Invitation, ApiKey, Subscription, APIUsage
 from ..scheduler import JOB_REGISTRY, execute_job
 from ..middleware.auth import get_current_user
-from ..config.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ def admin_overview(current_user: User = Depends(get_current_user), db: Session =
         raise HTTPException(403, detail="Admin access required")
 
     tenant_id = current_user.tenant_id
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
     api_calls_today = (
@@ -113,7 +112,7 @@ def create_invitation(
         email=email,
         role=role,
         token=token,
-        expires_at=datetime.utcnow() + timedelta(hours=72),
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=72),
     )
     db.add(inv)
     db.commit()
@@ -308,25 +307,38 @@ def trigger_job(job_name: str, db: Session = Depends(get_db)):
 
 @router.get("/etl/status")
 def etl_status(db: Session = Depends(get_db)):
+    """Last-run por job + scheduler info. Una sola query con subquery + JOIN."""
     from ..scheduler import scheduler
     jobs = sorted(JOB_REGISTRY.keys())
-    last_runs = {}
-    for jn in jobs:
-        row = (
-            db.query(ETLRun)
-            .filter(ETLRun.job_name == jn)
-            .order_by(ETLRun.started_at.desc())
-            .first()
+
+    latest = (
+        db.query(
+            ETLRun.job_name,
+            func.max(ETLRun.started_at).label("max_started"),
         )
-        if row:
-            last_runs[jn] = {
-                "status": row.status,
-                "started_at": row.started_at.isoformat() if row.started_at else None,
-                "finished_at": row.finished_at.isoformat() if row.finished_at else None,
-                "duration_ms": row.duration_ms,
-            }
-        else:
-            last_runs[jn] = None
+        .filter(ETLRun.job_name.in_(jobs))
+        .group_by(ETLRun.job_name)
+        .subquery()
+    )
+    rows = (
+        db.query(ETLRun)
+        .join(
+            latest,
+            (ETLRun.job_name == latest.c.job_name)
+            & (ETLRun.started_at == latest.c.max_started),
+        )
+        .all()
+    )
+
+    last_runs: dict[str, dict | None] = {jn: None for jn in jobs}
+    for r in rows:
+        last_runs[str(r.job_name)] = {
+            "status": r.status,
+            "started_at": r.started_at.isoformat() if r.started_at else None,
+            "finished_at": r.finished_at.isoformat() if r.finished_at else None,
+            "duration_ms": r.duration_ms,
+        }
+
     return {
         "scheduler_running": scheduler.running,
         "registered_jobs": jobs,

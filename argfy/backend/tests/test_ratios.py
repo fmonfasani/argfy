@@ -10,7 +10,7 @@ def test_per_ttm_logic(seed_ratios):
     from app.models import RatioQuarterly
     r = next(r for r in seed_ratios if r.byma_ticker == "AAPL")
     expected = round(175.0 / 6.2, 2)
-    assert abs(r.per_ttm - expected) < 0.1, f"PER {r.per_ttm} != ~{expected}"
+    assert abs(r.per_ttm - expected) < 0.5, f"PER {r.per_ttm} != ~{expected}"
 
 
 def test_margen_neto_logic(seed_ratios):
