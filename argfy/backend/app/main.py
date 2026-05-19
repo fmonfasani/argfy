@@ -46,21 +46,6 @@ def load_router(router_name: str, module_path: str):
         elif router_name == "economic_cards":
             from .routers.economic_cards import router
             return router
-        elif router_name == "expanded_indicators":
-            from .routers.expanded_indicators import router
-            return router
-        elif router_name == "health":
-            from .routers.health import router
-            return router
-        elif router_name == "system":
-            from .routers.system import router
-            return router
-        elif router_name == "unified_economic":
-            from .routers.unified_economic import router
-            return router
-        elif router_name == "bcra_real":
-            from .routers.bcra_real import router
-            return router
         elif router_name == "fundamentals":
             from .routers.fundamentals import router
             return router
@@ -94,12 +79,7 @@ def load_router(router_name: str, module_path: str):
 # ✅ CARGAR TODOS LOS ROUTERS
 routers_config = [
     ("indicators", "app.routers.indicators"),
-    ("data", "app.routers.data"),  # ✅ Ahora existe
-    ("economic_cards", "app.routers.economic_cards"),
     ("health", "app.routers.health"),
-    ("system", "app.routers.system"),
-    ("unified_economic", "app.routers.unified_economic"),
-    ("bcra_real", "app.routers.bcra_real"),
     ("expanded_indicators", "app.routers.expanded_indicators"),
     ("fundamentals", "app.routers.fundamentals"),
     ("admin", "app.routers.admin"),
